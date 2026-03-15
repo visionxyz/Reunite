@@ -2,7 +2,9 @@
 
 **Reunite** uses EverMemOS semantic memory and OpenAI conversational AI to help reconnect missing children with their families. Parents register descriptions of their missing child; children/adults with fragmentary childhood memories register what they remember. The system intelligently matches them using memory-based semantic search.
 
-**Video Demo:** [video/demo.mp4](video/demo.mp4)
+**Video Demo:** [Reunite_Final_Video.mp4](Reunite_Final_Video.mp4)
+
+**Deployment:** A live demo is not provided at this time, as the platform deals with sensitive missing children data. To protect privacy and avoid misuse, we only demonstrate with synthetic mock data in a local environment. Reviewers are welcome to clone the repo and run it locally following the Quick Start instructions below.
 
 ---
 
