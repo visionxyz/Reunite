@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reunite - Find Missing Children</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>Reunite</h1>
+        <p>Bringing families back together with AI-powered memory matching</p>
+    </div>
+
+    <div class="stats" id="stats">
+        <div class="stat">
+            <div class="num" id="stat-parent">-</div>
+            <div class="label">Parents Seeking</div>
+        </div>
+        <div class="stat">
+            <div class="num" id="stat-child">-</div>
+            <div class="label">Children Seeking</div>
+        </div>
+        <div class="stat">
+            <div class="num" id="stat-total">-</div>
+            <div class="label">Total Entries</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="browse">Browse</button>
+            <button class="tab-btn" data-tab="search">Smart Search</button>
+            <button class="tab-btn" data-tab="register">Register</button>
+            <button class="tab-btn" data-tab="my-entries">My Entries</button>
+        </div>
+
+        <!-- Browse Tab -->
+        <div class="tab-content active" id="tab-browse">
+            <div class="type-toggle">
+                <input type="radio" name="browse-type" id="browse-all" value="" checked>
+                <label for="browse-all">All</label>
+                <input type="radio" name="browse-type" id="browse-parent" value="家寻宝贝">
+                <label for="browse-parent">Parents Seeking</label>
+                <input type="radio" name="browse-type" id="browse-child" value="宝贝寻家">
+                <label for="browse-child">Children Seeking</label>
+            </div>
+            <div id="entries-list">
+                <div class="loading">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Search Tab -->
+        <div class="tab-content" id="tab-search">
+            <div class="form-section">
+                <h2>Smart Match Search</h2>
+                <p style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">
+                    Enter any information you remember. AI will search the opposite database for potential matches.
+                </p>
+                <form id="search-form">
+                    <div class="type-toggle">
+                        <input type="radio" name="search-type" id="search-as-parent" value="家寻宝贝" checked>
+                        <label for="search-as-parent">I'm a parent looking for my child</label>
+                        <input type="radio" name="search-type" id="search-as-child" value="宝贝寻家">
+                        <label for="search-as-child">I'm looking for my family</label>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select name="gender">
+                                <option value="">Any</option>
+                                <option value="男">Male</option>
+                                <option value="女">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Birth Year (approx.)</label>
+                            <input type="text" name="birth_date" placeholder="e.g. 2005 or 2005-06">
+                        </div>
+                        <div class="form-group full">
+                            <label>Location</label>
+                            <input type="text" name="location" placeholder="Place of disappearance / remembered location">
+                        </div>
+                        <div class="form-group full">
+                            <label>Physical Features</label>
+                            <textarea name="physical_features" rows="2" placeholder="Birthmarks, scars, body features..."></textarea>
+                        </div>
+                        <div class="form-group full">
+                            <label>Description / Memory Fragments</label>
+                            <textarea name="description" rows="4" placeholder="Describe everything you remember: appearance, habits, environment, sounds, smells, events... any detail could help find each other"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-search btn-block">Start Smart Matching</button>
+                </form>
+            </div>
+            <div id="search-results" style="display:none;">
+                <div class="results-header">
+                    <h2>Match Results</h2>
+                </div>
+                <div id="search-results-list"></div>
+            </div>
+        </div>
+
+        <!-- Register Tab -->
+        <div class="tab-content" id="tab-register">
+            <div class="form-section">
+                <h2>Register Entry</h2>
+                <form id="register-form">
+                    <div class="type-toggle">
+                        <input type="radio" name="entry_type" id="reg-parent" value="家寻宝贝" checked>
+                        <label for="reg-parent">Parent Seeking Child</label>
+                        <input type="radio" name="entry_type" id="reg-child" value="宝贝寻家">
+                        <label for="reg-child">Child Seeking Family</label>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Name / Current Name</label>
+                            <input type="text" name="name" placeholder="Real name or current name">
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select name="gender">
+                                <option value="">Select</option>
+                                <option value="男">Male</option>
+                                <option value="女">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Birth Date (approx.)</label>
+                            <input type="text" name="birth_date" placeholder="e.g. 2005 or 2005-06-15">
+                        </div>
+                        <div class="form-group">
+                            <label>Date Missing / Left Home</label>
+                            <input type="text" name="missing_date" placeholder="e.g. 2010-08 or around 2010">
+                        </div>
+                        <div class="form-group full">
+                            <label>Location</label>
+                            <input type="text" name="location" placeholder="Place of disappearance or remembered location">
+                        </div>
+                        <div class="form-group full">
+                            <label>Physical Features</label>
+                            <textarea name="physical_features" rows="2" placeholder="Birthmarks, scars, moles, body features"></textarea>
+                        </div>
+                        <div class="form-group full">
+                            <label>Detailed Description</label>
+                            <textarea name="description" rows="4" placeholder="Describe all the information you remember"></textarea>
+                        </div>
+                        <div class="form-group full">
+                            <label>Contact</label>
+                            <input type="text" name="contact" placeholder="Phone number or other contact info">
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <button type="submit" class="btn btn-primary btn-block">Submit Registration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- My Entries Tab -->
+        <div class="tab-content" id="tab-my-entries">
+            <!-- My entries list -->
+            <div id="my-entries-view">
+                <div id="my-entries-list"></div>
+            </div>
+
+            <!-- Chat panel (hidden until entry selected) -->
+            <div id="chat-panel" style="display:none;">
+                <div style="margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
+                    <button class="btn" onclick="backToMyEntries()" style="background:#eee; color:#333;">&larr; Back to My Entries</button>
+                    <span id="chat-entry-badge" style="padding:0.5rem 1rem; background:#e8f5e9; border-radius:6px; font-size:0.9rem; color:#2e7d32; font-weight:500;"></span>
+                </div>
+                <div class="chat-layout">
+                    <!-- Left: context form -->
+                    <div class="chat-sidebar">
+                        <h3>Entry Information</h3>
+                        <p class="chat-hint">The AI will guide you to recall more. New details are saved automatically.</p>
+                        <div class="type-toggle">
+                            <input type="radio" name="chat-type" id="chat-parent" value="家寻宝贝" checked>
+                            <label for="chat-parent">Parent Seeking</label>
+                            <input type="radio" name="chat-type" id="chat-child" value="宝贝寻家">
+                            <label for="chat-child">Child Seeking</label>
+                        </div>
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="chat-name" placeholder="Name or current name">
+                        </div>
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select id="chat-gender">
+                                <option value="">Unknown</option>
+                                <option value="男">Male</option>
+                                <option value="女">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Birth Date</label>
+                            <input type="text" id="chat-birth" placeholder="e.g. 2005">
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="chat-location" placeholder="Location or vague memory">
+                        </div>
+                        <div class="form-group">
+                            <label>Physical Features</label>
+                            <textarea id="chat-features" rows="2" placeholder="Birthmarks, scars, etc."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="chat-desc" rows="3" placeholder="What you remember so far"></textarea>
+                        </div>
+                        <button class="btn btn-block" style="background:#FF9800; color:#fff;" onclick="saveUpdates()">Save Updated Info</button>
+                    </div>
+
+                    <!-- Right: chat window -->
+                    <div class="chat-main">
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="chat-welcome">
+                                <h3>AI Memory Guide</h3>
+                                <p>I'll help you recall more details through gentle conversation.</p>
+                            </div>
+                        </div>
+                        <div class="chat-input-area">
+                            <textarea id="chat-input" placeholder="Type your answer..." rows="2" disabled></textarea>
+                            <button id="chat-send-btn" class="btn btn-primary" onclick="sendMessage()" disabled>Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Modal -->
+    <div class="modal-overlay" id="match-modal">
+        <div class="modal">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <h2>Match Results</h2>
+            <div id="modal-results">
+                <div class="loading">Matching...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TYPE_LABELS = {
+            '家寻宝贝': 'Parent Seeking',
+            '宝贝寻家': 'Child Seeking',
+            '男': 'Male',
+            '女': 'Female',
+        };
+        function t(val) { return TYPE_LABELS[val] || val || 'Unknown'; }
+
+        // ==================== localStorage for "My Entries" ====================
+        function getMyEntryIds() {
+            try { return JSON.parse(localStorage.getItem('reunite_my_entries') || '[]'); }
+            catch { return []; }
+        }
+        function addMyEntryId(id) {
+            const ids = getMyEntryIds();
+            if (!ids.includes(id)) {
+                ids.push(id);
+                localStorage.setItem('reunite_my_entries', JSON.stringify(ids));
+            }
+        }
+
+        // ==================== Tab switching ====================
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+                if (btn.dataset.tab === 'my-entries') loadMyEntries();
+            });
+        });
+
+        // ==================== Browse ====================
+        async function loadEntries(type = '') {
+            const url = type ? `/api/entries?entry_type=${encodeURIComponent(type)}` : '/api/entries';
+            const res = await fetch(url);
+            const entries = await res.json();
+            renderEntries(entries, 'entries-list', false);
+            updateStats();
+        }
+
+        async function updateStats() {
+            const all = await (await fetch('/api/entries')).json();
+            const parents = all.filter(e => e.entry_type === '家寻宝贝');
+            const children = all.filter(e => e.entry_type === '宝贝寻家');
+            document.getElementById('stat-parent').textContent = parents.length;
+            document.getElementById('stat-child').textContent = children.length;
+            document.getElementById('stat-total').textContent = all.length;
+        }
+
+        function renderEntries(entries, containerId, showChatBtn) {
+            const container = document.getElementById(containerId);
+            if (entries.length === 0) {
+                container.innerHTML = '<div class="empty">No entries yet</div>';
+                return;
+            }
+            container.innerHTML = entries.map(e => renderCard(e, null, showChatBtn)).join('');
+        }
+
+        function renderCard(entry, score = null, showChatBtn = false) {
+            const isParent = entry.entry_type === '家寻宝贝';
+            const badgeClass = isParent ? 'badge-parent' : 'badge-child';
+            let scoreHtml = '';
+            if (score !== null) {
+                const pct = Math.round(score * 100);
+                const cls = pct >= 60 ? 'score-high' : pct >= 35 ? 'score-mid' : 'score-low';
+                scoreHtml = `<span class="score-badge ${cls}">Match ${pct}%</span>`;
+            }
+            const chatBtn = showChatBtn
+                ? `<button class="btn-match" onclick="openChat(${entry.id})" style="background:#FF9800;">AI Chat</button>`
+                : '';
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <h3>${entry.name || 'Unknown'}</h3>
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            ${scoreHtml}
+                            <span class="badge ${badgeClass}">${t(entry.entry_type)}</span>
+                            <button class="btn-match" onclick="findMatch(${entry.id})">Find Match</button>
+                            ${chatBtn}
+                        </div>
+                    </div>
+                    <div class="card-info">
+                        <span><strong>Gender:</strong> ${t(entry.gender)}</span>
+                        <span><strong>Born:</strong> ${entry.birth_date || 'Unknown'}</span>
+                        <span><strong>Missing:</strong> ${entry.missing_date || 'Unknown'}</span>
+                        <span><strong>Location:</strong> ${entry.location || 'Unknown'}</span>
+                    </div>
+                    ${entry.physical_features ? `<div class="card-features"><strong>Physical Features:</strong> ${entry.physical_features}</div>` : ''}
+                    <div class="card-desc">${entry.description}</div>
+                </div>
+            `;
+        }
+
+        document.querySelectorAll('input[name="browse-type"]').forEach(radio => {
+            radio.addEventListener('change', () => loadEntries(radio.value));
+        });
+
+        // ==================== Find Match ====================
+        async function findMatch(entryId) {
+            const modal = document.getElementById('match-modal');
+            const results = document.getElementById('modal-results');
+            modal.classList.add('active');
+            results.innerHTML = '<div class="loading">Running smart matching...</div>';
+
+            const res = await fetch(`/api/match/${entryId}`);
+            const matches = await res.json();
+
+            if (matches.length === 0) {
+                results.innerHTML = '<div class="empty">No matches found yet</div>';
+                return;
+            }
+            results.innerHTML = matches.map(m => renderCard(m.entry, m.score)).join('');
+        }
+
+        function closeModal() {
+            document.getElementById('match-modal').classList.remove('active');
+        }
+        document.getElementById('match-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        // ==================== Search ====================
+        document.getElementById('search-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            formData.set('entry_type', document.querySelector('input[name="search-type"]:checked').value);
+
+            const resultsDiv = document.getElementById('search-results');
+            const listDiv = document.getElementById('search-results-list');
+            resultsDiv.style.display = 'block';
+            listDiv.innerHTML = '<div class="loading">Running smart matching...</div>';
+
+            const res = await fetch('/api/search', { method: 'POST', body: formData });
+            const matches = await res.json();
+
+            if (matches.length === 0) {
+                listDiv.innerHTML = '<div class="empty">No matches found yet</div>';
+                return;
+            }
+            listDiv.innerHTML = matches.map(m => renderCard(m.entry, m.score)).join('');
+        });
+
+        // ==================== Register ====================
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const res = await fetch('/api/entries', { method: 'POST', body: formData });
+            const result = await res.json();
+            if (result.id) {
+                addMyEntryId(result.id);
+                loadEntries();
+                const wantChat = confirm(
+                    'Registration successful!\n\n' +
+                    'Would you like to start an AI-guided conversation to recall more details? ' +
+                    'This can significantly improve matching accuracy.'
+                );
+                e.target.reset();
+                if (wantChat) {
+                    document.querySelector('[data-tab="my-entries"]').click();
+                    // Small delay to let tab switch, then open chat
+                    setTimeout(() => openChat(result.id), 100);
+                } else {
+                    document.querySelector('[data-tab="my-entries"]').click();
+                }
+            }
+        });
+
+        // ==================== My Entries ====================
+        async function loadMyEntries() {
+            const ids = getMyEntryIds();
+            const container = document.getElementById('my-entries-list');
+
+            if (ids.length === 0) {
+                container.innerHTML = `
+                    <div class="empty">
+                        <p>You haven't registered any entries yet.</p>
+                        <p style="margin-top:0.5rem;">
+                            <button class="btn btn-primary" onclick="document.querySelector('[data-tab=register]').click()">
+                                Register Now
+                            </button>
+                        </p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = '<div class="loading">Loading your entries...</div>';
+            const entries = [];
+            for (const id of ids) {
+                try {
+                    const res = await fetch(`/api/entries/${id}`);
+                    if (res.ok) entries.push(await res.json());
+                } catch {}
+            }
+
+            if (entries.length === 0) {
+                container.innerHTML = '<div class="empty">No entries found. They may have been removed.</div>';
+                return;
+            }
+
+            container.innerHTML = entries.map(e => renderCard(e, null, true)).join('');
+        }
+
+        function backToMyEntries() {
+            document.getElementById('chat-panel').style.display = 'none';
+            document.getElementById('my-entries-view').style.display = 'block';
+            loadMyEntries();
+        }
+
+        // ==================== AI Chat ====================
+        let chatHistory = [];
+        let chatActive = false;
+        let chatEntryId = null;
+
+        function getChatEntryInfo() {
+            return {
+                entry_type: document.querySelector('input[name="chat-type"]:checked').value,
+                name: document.getElementById('chat-name').value,
+                gender: document.getElementById('chat-gender').value,
+                birth_date: document.getElementById('chat-birth').value,
+                location: document.getElementById('chat-location').value,
+                physical_features: document.getElementById('chat-features').value,
+                description: document.getElementById('chat-desc').value,
+            };
+        }
+
+        async function openChat(entryId) {
+            // Load entry data
+            const res = await fetch(`/api/entries/${entryId}`);
+            const entry = await res.json();
+            chatEntryId = entryId;
+
+            // Fill sidebar form
+            document.querySelectorAll('input[name="chat-type"]').forEach(r => {
+                r.checked = r.value === entry.entry_type;
+            });
+            document.getElementById('chat-name').value = entry.name || '';
+            document.getElementById('chat-gender').value = entry.gender || '';
+            document.getElementById('chat-birth').value = entry.birth_date || '';
+            document.getElementById('chat-location').value = entry.location || '';
+            document.getElementById('chat-features').value = entry.physical_features || '';
+            document.getElementById('chat-desc').value = entry.description || '';
+
+            // Show chat panel, hide entries list
+            document.getElementById('my-entries-view').style.display = 'none';
+            document.getElementById('chat-panel').style.display = 'block';
+
+            const badge = document.getElementById('chat-entry-badge');
+            badge.textContent = `${entry.name || 'Entry'} (ID: ${entryId})`;
+
+            // Start chat
+            chatHistory = [];
+            chatActive = true;
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '';
+
+            document.getElementById('chat-input').disabled = false;
+            document.getElementById('chat-send-btn').disabled = false;
+            document.getElementById('chat-input').focus();
+
+            showTyping();
+            try {
+                const reply = await callChat([]);
+                removeTyping();
+                chatHistory.push({ role: 'assistant', content: reply });
+                appendMessage('assistant', reply);
+            } catch (e) {
+                removeTyping();
+                appendMessage('assistant', 'Sorry, connection error. Please check that the OpenAI API Key is configured.');
+            }
+        }
+
+        function appendMessage(role, content) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = `chat-bubble chat-${role}`;
+
+            const label = document.createElement('div');
+            label.className = 'chat-label';
+            label.textContent = role === 'assistant' ? 'AI Guide' : 'Me';
+
+            const text = document.createElement('div');
+            text.className = 'chat-text';
+            text.innerHTML = content.replace(/\n/g, '<br>');
+
+            div.appendChild(label);
+            div.appendChild(text);
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showTyping() {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = 'chat-bubble chat-assistant';
+            div.id = 'typing-indicator';
+            div.innerHTML = '<div class="chat-label">AI Guide</div><div class="chat-text typing-dots">Thinking...</div>';
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTyping() {
+            const el = document.getElementById('typing-indicator');
+            if (el) el.remove();
+        }
+
+        async function callChat(messages) {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    entry_id: chatEntryId,
+                    entry_info: getChatEntryInfo(),
+                    messages: messages,
+                }),
+            });
+            const data = await res.json();
+            return data.reply;
+        }
+
+        async function saveUpdates() {
+            if (!chatEntryId) return;
+            const info = getChatEntryInfo();
+            try {
+                const res = await fetch(`/api/entries/${chatEntryId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(info),
+                });
+                if (res.ok) {
+                    alert('Entry updated and new memories stored in EverMemOS.');
+                } else {
+                    alert('Failed to update entry.');
+                }
+            } catch (e) {
+                alert('Error saving updates: ' + e.message);
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text || !chatActive) return;
+
+            input.value = '';
+            chatHistory.push({ role: 'user', content: text });
+            appendMessage('user', text);
+
+            // Append to description field
+            const descEl = document.getElementById('chat-desc');
+            if (descEl.value) {
+                descEl.value += '\n' + text;
+            } else {
+                descEl.value = text;
+            }
+
+            showTyping();
+            document.getElementById('chat-send-btn').disabled = true;
+
+            try {
+                const reply = await callChat(chatHistory);
+                removeTyping();
+                chatHistory.push({ role: 'assistant', content: reply });
+                appendMessage('assistant', reply);
+            } catch (e) {
+                removeTyping();
+                appendMessage('assistant', 'Sorry, something went wrong. Please try again.');
+            }
+
+            document.getElementById('chat-send-btn').disabled = false;
+            input.focus();
+        }
+
+        document.getElementById('chat-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // ==================== Init ====================
+        loadEntries();
+    </script>
+</body>
+</html>
