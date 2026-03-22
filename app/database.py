@@ -1,10 +1,15 @@
 """SQLite database for entries (local metadata only, memories stored in EverMemOS)."""
 
+import os
 import sqlite3
 from pathlib import Path
 from app.models import Entry
 
-DB_PATH = Path(__file__).parent.parent / "data" / "reunite.db"
+# Use /tmp on Vercel (ephemeral), local data/ dir otherwise
+if os.environ.get("VERCEL"):
+    DB_PATH = Path("/tmp/reunite.db")
+else:
+    DB_PATH = Path(__file__).parent.parent / "data" / "reunite.db"
 
 
 def get_db() -> sqlite3.Connection:

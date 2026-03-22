@@ -1,5 +1,6 @@
 """FastAPI application for Reunite - 团圆寻亲平台."""
 
+import os
 from pathlib import Path
 from fastapi import FastAPI, Request, Form, Body
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -11,6 +12,8 @@ from app import matching
 from app import assistant
 from app.mock_data import PARENT_ENTRIES, CHILD_ENTRIES
 
+IS_VERCEL = bool(os.environ.get("VERCEL"))
+
 app = FastAPI(title="团圆 - 寻亲平台")
 
 BASE_DIR = Path(__file__).parent
@@ -18,18 +21,24 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
-@app.on_event("startup")
-async def startup():
+def _ensure_db():
+    """Init DB and load mock data if empty. Called on startup and lazily on Vercel."""
     db.init_db()
-    # Load mock data if database is empty
     existing = db.get_all_entries()
     if not existing:
         print("Loading mock data...")
         for entry in PARENT_ENTRIES + CHILD_ENTRIES:
             entry_id = db.insert_entry(entry)
             entry.id = entry_id
-            matching.store_memory(entry)
+            # On Vercel, skip EverMemOS upload on cold start (data already in EverMemOS)
+            if not IS_VERCEL:
+                matching.store_memory(entry)
         print(f"Loaded {len(PARENT_ENTRIES)} parent entries and {len(CHILD_ENTRIES)} child entries.")
+
+
+@app.on_event("startup")
+async def startup():
+    _ensure_db()
 
 
 @app.get("/", response_class=HTMLResponse)
