@@ -14,3 +14,7 @@ wheels/
 
 # Database
 data/
+
+# OS / editor temp files
+~$*
+.DS_Store
