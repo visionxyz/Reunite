@@ -1,7 +1,9 @@
 """FastAPI application for Reunite - 团圆寻亲平台."""
 
 import os
+import traceback
 from pathlib import Path
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Form, Body
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -13,16 +15,16 @@ from app import assistant
 from app.mock_data import PARENT_ENTRIES, CHILD_ENTRIES
 
 IS_VERCEL = bool(os.environ.get("VERCEL"))
-
-app = FastAPI(title="团圆 - 寻亲平台")
-
 BASE_DIR = Path(__file__).parent
-app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
-templates = Jinja2Templates(directory=BASE_DIR / "templates")
+
+_db_ready = False
 
 
 def _ensure_db():
-    """Init DB and load mock data if empty. Called on startup and lazily on Vercel."""
+    """Init DB and load mock data if empty."""
+    global _db_ready
+    if _db_ready:
+        return
     db.init_db()
     existing = db.get_all_entries()
     if not existing:
@@ -30,15 +32,30 @@ def _ensure_db():
         for entry in PARENT_ENTRIES + CHILD_ENTRIES:
             entry_id = db.insert_entry(entry)
             entry.id = entry_id
-            # On Vercel, skip EverMemOS upload on cold start (data already in EverMemOS)
             if not IS_VERCEL:
                 matching.store_memory(entry)
         print(f"Loaded {len(PARENT_ENTRIES)} parent entries and {len(CHILD_ENTRIES)} child entries.")
+    _db_ready = True
 
 
-@app.on_event("startup")
-async def startup():
-    _ensure_db()
+@asynccontextmanager
+async def lifespan(app):
+    try:
+        _ensure_db()
+    except Exception as e:
+        print(f"Startup error: {e}")
+        traceback.print_exc()
+    yield
+
+
+app = FastAPI(title="Reunite", lifespan=lifespan)
+
+# Mount static files
+static_dir = BASE_DIR / "static"
+if static_dir.is_dir():
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -48,6 +65,7 @@ async def index(request: Request):
 
 @app.get("/api/entries")
 async def list_entries(entry_type: str | None = None):
+    _ensure_db()
     entries = db.get_all_entries(entry_type=entry_type)
     return [e.to_dict() for e in entries]
 
