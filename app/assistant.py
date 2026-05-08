@@ -6,14 +6,24 @@ from app.models import Entry
 from app import matching
 
 _client: AsyncOpenAI | None = None
+_default_model: str = "openai/gpt-4o-mini"
 
 
 def _get_openai() -> AsyncOpenAI | None:
-    global _client
+    global _client, _default_model
     if _client is None:
-        key = os.getenv("OPENAI_API_KEY")
-        if key and key != "your-openai-api-key-here":
-            _client = AsyncOpenAI()
+        or_key = os.getenv("OPENROUTER_API_KEY")
+        if or_key and or_key != "your-openrouter-api-key-here":
+            _client = AsyncOpenAI(
+                api_key=or_key,
+                base_url="https://openrouter.ai/api/v1",
+            )
+            _default_model = "openai/gpt-4o-mini"
+        else:
+            key = os.getenv("OPENAI_API_KEY")
+            if key and key != "your-openai-api-key-here":
+                _client = AsyncOpenAI()
+                _default_model = "gpt-4o-mini"
     return _client
 
 
@@ -60,7 +70,7 @@ async def chat(
     """
     client = _get_openai()
     if not client:
-        return "The AI assistant requires an OpenAI API Key. Please set OPENAI_API_KEY in your .env file."
+        return "The AI assistant requires an API key. Please set OPENROUTER_API_KEY (preferred) or OPENAI_API_KEY in your .env file."
 
     # Build context from entry info
     context_parts = ["## User's Current Information"]
@@ -115,7 +125,7 @@ async def chat(
         oai_messages.extend(messages)
 
     response = await client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=os.getenv("OPENAI_MODEL", _default_model),
         messages=oai_messages,
         temperature=0.7,
         max_tokens=500,

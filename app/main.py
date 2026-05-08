@@ -117,18 +117,19 @@ async def update_entry(entry_id: int, payload: dict = Body(...)):
     db.update_entry(entry_id, **payload)
     updated = db.get_entry(entry_id)
 
-    # Re-store in EverMemOS with updated info
+    # Re-store in EverOS with updated info — clear stale memories first
+    matching.delete_memory(updated)
     matching.store_memory(updated)
 
     return updated.to_dict()
 
 
 @app.get("/api/match/{entry_id}")
-async def match_entry(entry_id: int, top_k: int = 10):
+async def match_entry(entry_id: int, top_k: int = 10, min_score: float = matching.DEFAULT_MIN_SCORE):
     entry = db.get_entry(entry_id)
     if not entry:
         return JSONResponse({"error": "Not found"}, status_code=404)
-    results = matching.find_matches(entry, top_k=top_k)
+    results = matching.find_matches(entry, top_k=top_k, min_score=min_score)
     return [
         {"entry": r.entry.to_dict(), "score": round(r.score, 4)}
         for r in results

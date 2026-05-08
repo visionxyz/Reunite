@@ -139,8 +139,8 @@ wheels = [
 ]
 
 [[package]]
-name = "evermemos"
-version = "0.3.13"
+name = "everos"
+version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -150,9 +150,9 @@ dependencies = [
     { name = "sniffio" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/86/c9/ea27d5a767333328c08617b855bae441aa1c9a586d2b1dbff4c27d4aec11/evermemos-0.3.13.tar.gz", hash = "sha256:0ca674d0dff14f7aba6191d1fffe3ae25883bff739faff332f3b97ea26dcf080", size = 230708, upload-time = "2026-02-13T09:30:23.768Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/05/b7/a73cc7e5371b7fbd5ec70ae660b96cdc960ac871fc4ae4a5c996401eb027/everos-0.4.0.tar.gz", hash = "sha256:0abc717ac53e929b3a78b5aba6fe64231d6841d2d233fe7e9ea29cf8188053df", size = 257417, upload-time = "2026-04-09T02:31:03.841Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e5/fd/e4f8d23ce07822bd614e9fb674fdaacff4457cc094a27022fd6b8929ece2/evermemos-0.3.13-py3-none-any.whl", hash = "sha256:ad2a092f7e1f5b90d89dff5e81343db64a46d18e4eef1f2a9f9b069ccee6ad92", size = 94146, upload-time = "2026-02-13T09:30:24.806Z" },
+    { url = "https://files.pythonhosted.org/packages/df/60/90b7e27b40acedc412c4dd78cb19b2c0b3acd00618bc4feb21a6ba322a1f/everos-0.4.0-py3-none-any.whl", hash = "sha256:f12f59b6cf6c6413416507784b19ea81a3776ee3b623a16f1574aedb6d2a188c", size = 131579, upload-time = "2026-04-09T02:31:04.779Z" },
 ]
 
 [[package]]
@@ -504,7 +504,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "aiofiles" },
-    { name = "evermemos" },
+    { name = "everos" },
     { name = "fastapi" },
     { name = "jinja2" },
     { name = "openai" },
@@ -517,7 +517,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "aiofiles", specifier = ">=25.1.0" },
-    { name = "evermemos", specifier = ">=0.3.13" },
+    { name = "everos", specifier = ">=0.4.0" },
     { name = "fastapi", specifier = ">=0.135.1" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "openai", specifier = ">=2.26.0" },

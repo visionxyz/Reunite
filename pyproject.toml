@@ -1,12 +1,12 @@
 [project]
 name = "reunite-app"
 version = "0.1.0"
-description = "AI-powered missing children matching platform using EverMemOS semantic memory"
+description = "AI-powered missing children matching platform using EverOS semantic memory"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "aiofiles>=25.1.0",
-    "evermemos>=0.3.13",
+    "everos>=0.4.0",
     "fastapi>=0.135.1",
     "jinja2>=3.1.6",
     "openai>=2.26.0",
