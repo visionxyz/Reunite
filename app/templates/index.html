@@ -3,29 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reunite - Find Missing Children</title>
+    <title>Reunite — Memory-based matching for missing families</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="header">
-        <h1>Reunite</h1>
-        <p>Bringing families back together with AI-powered memory matching</p>
-    </div>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand">
+                <span class="brand-mark">Reunite</span>
+                <span class="brand-tag">memory-based family search</span>
+            </div>
+        </div>
+    </header>
 
-    <div class="stats" id="stats">
+    <section class="hero">
+        <h1>Helping families find each other again, even when memories blur.</h1>
+        <p>Parents describe what they remember. Children describe what they recall. Reunite uses semantic memory to surface the connections — including the ones half-buried in time.</p>
+    </section>
+
+    <section class="stats" id="stats">
         <div class="stat">
-            <div class="num" id="stat-parent">-</div>
-            <div class="label">Parents Seeking</div>
+            <div class="num tnum" id="stat-parent">—</div>
+            <div class="label">Parents searching</div>
         </div>
         <div class="stat">
-            <div class="num" id="stat-child">-</div>
-            <div class="label">Children Seeking</div>
+            <div class="num tnum" id="stat-child">—</div>
+            <div class="label">Children searching</div>
         </div>
         <div class="stat">
-            <div class="num" id="stat-total">-</div>
-            <div class="label">Total Entries</div>
+            <div class="num tnum" id="stat-total">—</div>
+            <div class="label">Entries on record</div>
         </div>
-    </div>
+    </section>
 
     <div class="container">
         <div class="tabs">
@@ -46,17 +58,15 @@
                 <label for="browse-child">Children Seeking</label>
             </div>
             <div id="entries-list">
-                <div class="loading">Loading...</div>
+                <div class="skel"></div><div class="skel"></div><div class="skel"></div>
             </div>
         </div>
 
         <!-- Search Tab -->
         <div class="tab-content" id="tab-search">
             <div class="form-section">
-                <h2>Smart Match Search</h2>
-                <p style="color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">
-                    Enter any information you remember. AI will search the opposite database for potential matches.
-                </p>
+                <h2>Smart match search</h2>
+                <p>Enter anything you remember. We'll search the other side of the database for possible matches.</p>
                 <form id="search-form">
                     <div class="type-toggle">
                         <input type="radio" name="search-type" id="search-as-parent" value="家寻宝贝" checked>
@@ -90,12 +100,12 @@
                             <textarea name="description" rows="4" placeholder="Describe everything you remember: appearance, habits, environment, sounds, smells, events... any detail could help find each other"></textarea>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-search btn-block">Start Smart Matching</button>
+                    <button type="submit" class="btn btn-primary btn-block">Run smart matching</button>
                 </form>
             </div>
             <div id="search-results" style="display:none;">
                 <div class="results-header">
-                    <h2>Match Results</h2>
+                    <h2>Match results</h2>
                 </div>
                 <div id="search-results-list"></div>
             </div>
@@ -104,7 +114,8 @@
         <!-- Register Tab -->
         <div class="tab-content" id="tab-register">
             <div class="form-section">
-                <h2>Register Entry</h2>
+                <h2>Register an entry</h2>
+                <p>Add what you remember. You can come back later via "My entries" to add more details or chat with the AI memory guide.</p>
                 <form id="register-form">
                     <div class="type-toggle">
                         <input type="radio" name="entry_type" id="reg-parent" value="家寻宝贝" checked>
@@ -151,7 +162,7 @@
                         </div>
                     </div>
                     <div class="btn-row">
-                        <button type="submit" class="btn btn-primary btn-block">Submit Registration</button>
+                        <button type="submit" class="btn btn-primary btn-block">Submit entry</button>
                     </div>
                 </form>
             </div>
@@ -166,9 +177,9 @@
 
             <!-- Chat panel (hidden until entry selected) -->
             <div id="chat-panel" style="display:none;">
-                <div style="margin-bottom:1rem; display:flex; align-items:center; gap:1rem;">
-                    <button class="btn" onclick="backToMyEntries()" style="background:#eee; color:#333;">&larr; Back to My Entries</button>
-                    <span id="chat-entry-badge" style="padding:0.5rem 1rem; background:#e8f5e9; border-radius:6px; font-size:0.9rem; color:#2e7d32; font-weight:500;"></span>
+                <div class="chat-banner">
+                    <button class="btn btn-secondary" onclick="backToMyEntries()">&larr; Back to my entries</button>
+                    <span id="chat-entry-badge" class="chat-entry-badge"></span>
                 </div>
                 <div class="chat-layout">
                     <!-- Left: context form -->
@@ -209,15 +220,15 @@
                             <label>Description</label>
                             <textarea id="chat-desc" rows="3" placeholder="What you remember so far"></textarea>
                         </div>
-                        <button class="btn btn-block" style="background:#FF9800; color:#fff;" onclick="saveUpdates()">Save Updated Info</button>
+                        <button class="btn btn-accent btn-block" onclick="saveUpdates()">Save updated info</button>
                     </div>
 
                     <!-- Right: chat window -->
                     <div class="chat-main">
                         <div class="chat-messages" id="chat-messages">
                             <div class="chat-welcome">
-                                <h3>AI Memory Guide</h3>
-                                <p>I'll help you recall more details through gentle conversation.</p>
+                                <h3>AI memory guide</h3>
+                                <p>I'll gently ask questions to help you recall more details. Anything you share is saved automatically and can improve future matches.</p>
                             </div>
                         </div>
                         <div class="chat-input-area">
@@ -234,9 +245,9 @@
     <div class="modal-overlay" id="match-modal">
         <div class="modal">
             <button class="close-btn" onclick="closeModal()">&times;</button>
-            <h2>Match Results</h2>
+            <h2>Match results</h2>
             <div id="modal-results">
-                <div class="loading">Matching...</div>
+                <div class="skel"></div><div class="skel"></div><div class="skel"></div>
             </div>
         </div>
     </div>
@@ -295,7 +306,11 @@
         function renderEntries(entries, containerId, showChatBtn) {
             const container = document.getElementById(containerId);
             if (entries.length === 0) {
-                container.innerHTML = '<div class="empty">No entries yet</div>';
+                container.innerHTML = `
+                    <div class="empty">
+                        <h3>No entries here yet</h3>
+                        <p>When people register their search, their entry will appear in this list.</p>
+                    </div>`;
                 return;
             }
             container.innerHTML = entries.map(e => renderCard(e, null, showChatBtn)).join('');
@@ -307,32 +322,33 @@
             let scoreHtml = '';
             if (score !== null) {
                 const pct = Math.round(score * 100);
-                const cls = pct >= 60 ? 'score-high' : pct >= 35 ? 'score-mid' : 'score-low';
-                scoreHtml = `<span class="score-badge ${cls}">Match ${pct}%</span>`;
+                const cls = score >= 0.45 ? 'score-high' : score >= 0.38 ? 'score-mid' : 'score-low';
+                const label = score >= 0.45 ? 'Strong match' : score >= 0.38 ? 'Possible match' : 'Weak signal';
+                scoreHtml = `<span class="score-badge ${cls}"><span>${label}</span><span class="score-label">${pct}%</span></span>`;
             }
             const chatBtn = showChatBtn
-                ? `<button class="btn-match" onclick="openChat(${entry.id})" style="background:#FF9800;">AI Chat</button>`
+                ? `<button class="btn-match btn-match-accent" onclick="openChat(${entry.id})">AI chat</button>`
                 : '';
             return `
-                <div class="card">
+                <article class="card">
                     <div class="card-header">
                         <h3>${entry.name || 'Unknown'}</h3>
-                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <div class="card-actions">
                             ${scoreHtml}
                             <span class="badge ${badgeClass}">${t(entry.entry_type)}</span>
-                            <button class="btn-match" onclick="findMatch(${entry.id})">Find Match</button>
+                            <button class="btn-match" onclick="findMatch(${entry.id})">Find match</button>
                             ${chatBtn}
                         </div>
                     </div>
                     <div class="card-info">
-                        <span><strong>Gender:</strong> ${t(entry.gender)}</span>
-                        <span><strong>Born:</strong> ${entry.birth_date || 'Unknown'}</span>
-                        <span><strong>Missing:</strong> ${entry.missing_date || 'Unknown'}</span>
-                        <span><strong>Location:</strong> ${entry.location || 'Unknown'}</span>
+                        <span><strong>Gender</strong> ${t(entry.gender)}</span>
+                        <span><strong>Born</strong> ${entry.birth_date || 'Unknown'}</span>
+                        <span><strong>Missing</strong> ${entry.missing_date || 'Unknown'}</span>
+                        <span><strong>Location</strong> ${entry.location || 'Unknown'}</span>
                     </div>
-                    ${entry.physical_features ? `<div class="card-features"><strong>Physical Features:</strong> ${entry.physical_features}</div>` : ''}
-                    <div class="card-desc">${entry.description}</div>
-                </div>
+                    ${entry.physical_features ? `<div class="card-features"><strong>Physical features</strong> &nbsp;${entry.physical_features}</div>` : ''}
+                    ${entry.description ? `<div class="card-desc">${entry.description}</div>` : ''}
+                </article>
             `;
         }
 
@@ -345,13 +361,17 @@
             const modal = document.getElementById('match-modal');
             const results = document.getElementById('modal-results');
             modal.classList.add('active');
-            results.innerHTML = '<div class="loading">Running smart matching...</div>';
+            results.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
 
             const res = await fetch(`/api/match/${entryId}`);
             const matches = await res.json();
 
             if (matches.length === 0) {
-                results.innerHTML = '<div class="empty">No matches found yet</div>';
+                results.innerHTML = `
+                    <div class="empty">
+                        <h3>No confident matches yet</h3>
+                        <p>We didn't find anything strong enough to surface. Adding more details — physical features, places, sensory memories — helps the search.</p>
+                    </div>`;
                 return;
             }
             results.innerHTML = matches.map(m => renderCard(m.entry, m.score)).join('');
@@ -373,13 +393,17 @@
             const resultsDiv = document.getElementById('search-results');
             const listDiv = document.getElementById('search-results-list');
             resultsDiv.style.display = 'block';
-            listDiv.innerHTML = '<div class="loading">Running smart matching...</div>';
+            listDiv.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
 
             const res = await fetch('/api/search', { method: 'POST', body: formData });
             const matches = await res.json();
 
             if (matches.length === 0) {
-                listDiv.innerHTML = '<div class="empty">No matches found yet</div>';
+                listDiv.innerHTML = `
+                    <div class="empty">
+                        <h3>No confident matches yet</h3>
+                        <p>We found nothing strong enough to surface. New entries are added regularly — try again later, or fill in more details to widen the search.</p>
+                    </div>`;
                 return;
             }
             listDiv.innerHTML = matches.map(m => renderCard(m.entry, m.score)).join('');
@@ -418,17 +442,16 @@
             if (ids.length === 0) {
                 container.innerHTML = `
                     <div class="empty">
-                        <p>You haven't registered any entries yet.</p>
-                        <p style="margin-top:0.5rem;">
-                            <button class="btn btn-primary" onclick="document.querySelector('[data-tab=register]').click()">
-                                Register Now
-                            </button>
-                        </p>
+                        <h3>You haven't registered an entry yet</h3>
+                        <p>Once you register, you can come back here to add new memories or chat with our AI guide. The more details over time, the better the matches.</p>
+                        <button class="btn btn-primary" onclick="document.querySelector('[data-tab=register]').click()">
+                            Register an entry
+                        </button>
                     </div>`;
                 return;
             }
 
-            container.innerHTML = '<div class="loading">Loading your entries...</div>';
+            container.innerHTML = '<div class="skel"></div><div class="skel"></div>';
             const entries = [];
             for (const id of ids) {
                 try {
@@ -438,7 +461,11 @@
             }
 
             if (entries.length === 0) {
-                container.innerHTML = '<div class="empty">No entries found. They may have been removed.</div>';
+                container.innerHTML = `
+                    <div class="empty">
+                        <h3>Your entries weren't found</h3>
+                        <p>They may have been removed. You can register a new entry anytime.</p>
+                    </div>`;
                 return;
             }
 
