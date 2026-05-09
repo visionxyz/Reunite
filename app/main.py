@@ -185,31 +185,6 @@ async def match_entry(public_id: str, top_k: int = 10, min_score: float = matchi
     ]
 
 
-@app.post("/api/search")
-async def search(
-    entry_type: str = Form(...),
-    description: str = Form(""),
-    location: str = Form(""),
-    physical_features: str = Form(""),
-    gender: str = Form(""),
-    birth_date: str = Form(""),
-):
-    """Quick search without saving - create a temporary entry and match."""
-    query_entry = Entry(
-        entry_type=entry_type,
-        gender=gender,
-        birth_date=birth_date,
-        location=location,
-        physical_features=physical_features,
-        description=description,
-    )
-    results = matching.find_matches(query_entry, top_k=10)
-    return [
-        {"entry": r.entry.to_dict(), "score": round(r.score, 4)}
-        for r in results
-    ]
-
-
 @app.post("/api/chat")
 async def chat_with_assistant(payload: dict = Body(...)):
     """AI assistant conversation to guide users in recalling details."""

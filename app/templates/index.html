@@ -42,7 +42,6 @@
     <div class="container">
         <div class="tabs">
             <button class="tab-btn active" data-tab="browse">Browse</button>
-            <button class="tab-btn" data-tab="search">Smart Search</button>
             <button class="tab-btn" data-tab="register">Register</button>
             <button class="tab-btn" data-tab="my-entries">My Entries</button>
         </div>
@@ -59,55 +58,6 @@
             </div>
             <div id="entries-list">
                 <div class="skel"></div><div class="skel"></div><div class="skel"></div>
-            </div>
-        </div>
-
-        <!-- Search Tab -->
-        <div class="tab-content" id="tab-search">
-            <div class="form-section">
-                <h2>Smart match search</h2>
-                <p>Enter anything you remember. We'll search the other side of the database for possible matches.</p>
-                <form id="search-form">
-                    <div class="type-toggle">
-                        <input type="radio" name="search-type" id="search-as-parent" value="家寻宝贝" checked>
-                        <label for="search-as-parent">I'm a parent looking for my child</label>
-                        <input type="radio" name="search-type" id="search-as-child" value="宝贝寻家">
-                        <label for="search-as-child">I'm looking for my family</label>
-                    </div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Gender</label>
-                            <select name="gender">
-                                <option value="">Any</option>
-                                <option value="男">Male</option>
-                                <option value="女">Female</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Birth Year (approx.)</label>
-                            <input type="text" name="birth_date" placeholder="e.g. 2005 or 2005-06">
-                        </div>
-                        <div class="form-group full">
-                            <label>Location</label>
-                            <input type="text" name="location" placeholder="Place of disappearance / remembered location">
-                        </div>
-                        <div class="form-group full">
-                            <label>Physical Features</label>
-                            <textarea name="physical_features" rows="2" placeholder="Birthmarks, scars, body features..."></textarea>
-                        </div>
-                        <div class="form-group full">
-                            <label>Description / Memory Fragments</label>
-                            <textarea name="description" rows="4" placeholder="Describe everything you remember: appearance, habits, environment, sounds, smells, events... any detail could help find each other"></textarea>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Run smart matching</button>
-                </form>
-            </div>
-            <div id="search-results" style="display:none;">
-                <div class="results-header">
-                    <h2>Match results</h2>
-                </div>
-                <div id="search-results-list"></div>
             </div>
         </div>
 
@@ -395,31 +345,6 @@
             if (e.target === e.currentTarget) closeModal();
         });
 
-        // ==================== Search ====================
-        document.getElementById('search-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            formData.set('entry_type', document.querySelector('input[name="search-type"]:checked').value);
-
-            const resultsDiv = document.getElementById('search-results');
-            const listDiv = document.getElementById('search-results-list');
-            resultsDiv.style.display = 'block';
-            listDiv.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
-
-            const res = await fetch('/api/search', { method: 'POST', body: formData });
-            const matches = await res.json();
-
-            if (matches.length === 0) {
-                listDiv.innerHTML = `
-                    <div class="empty">
-                        <h3>No confident matches yet</h3>
-                        <p>We found nothing strong enough to surface. New entries are added regularly — try again later, or fill in more details to widen the search.</p>
-                    </div>`;
-                return;
-            }
-            listDiv.innerHTML = matches.map(m => renderCard(m.entry, m.score)).join('');
-        });
-
         // ==================== Register ====================
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -499,7 +424,7 @@
             `;
         }
 
-        async function loadSuggestionsFor(entry) {
+        async function loadSuggestionsFor(entry, attempt = 0) {
             const pid = entry.public_id;
             if (!pid) return;
             const slotId = 'sug-' + pid.replace(/[^A-Za-z0-9_]/g, '');
@@ -513,7 +438,15 @@
                 }
                 const sugs = await res.json();
                 if (sugs.length === 0) {
-                    slot.innerHTML = '<div class="suggestions-empty">No matches above the confidence threshold yet. We\'ll keep checking — try adding more details to widen the search.</div>';
+                    // Background matching can take ~5-10s after registration.
+                    // Retry up to 3 times before giving up so freshly registered
+                    // entries don't see a stale "no matches" message.
+                    if (attempt < 3) {
+                        slot.innerHTML = '<div class="suggestions-empty">Searching for matches…</div>';
+                        setTimeout(() => loadSuggestionsFor(entry, attempt + 1), 4000);
+                        return;
+                    }
+                    slot.innerHTML = '<div class="suggestions-empty">No matches above the confidence threshold yet. New entries are added regularly — try adding more details to widen the search.</div>';
                     return;
                 }
                 slot.innerHTML = sugs.map(s => renderCard(s.entry, s.score)).join('');
