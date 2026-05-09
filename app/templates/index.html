@@ -262,15 +262,20 @@
         function t(val) { return TYPE_LABELS[val] || val || 'Unknown'; }
 
         // ==================== localStorage for "My Entries" ====================
+        // v2 stores opaque public_id strings (e.g. "rnt_a8X3kp9Qe").
+        // The legacy v1 key (integer ids) is dropped — those ids are no longer
+        // resolvable since the backend only accepts public_id now.
+        const MY_ENTRIES_KEY = 'reunite_my_entries_v2';
         function getMyEntryIds() {
-            try { return JSON.parse(localStorage.getItem('reunite_my_entries') || '[]'); }
+            try { return JSON.parse(localStorage.getItem(MY_ENTRIES_KEY) || '[]'); }
             catch { return []; }
         }
         function addMyEntryId(id) {
+            if (!id) return;
             const ids = getMyEntryIds();
             if (!ids.includes(id)) {
                 ids.push(id);
-                localStorage.setItem('reunite_my_entries', JSON.stringify(ids));
+                localStorage.setItem(MY_ENTRIES_KEY, JSON.stringify(ids));
             }
         }
 
@@ -326,8 +331,9 @@
                 const label = score >= 0.45 ? 'Strong match' : score >= 0.38 ? 'Possible match' : 'Weak signal';
                 scoreHtml = `<span class="score-badge ${cls}"><span>${label}</span><span class="score-label">${pct}%</span></span>`;
             }
+            const pid = entry.public_id || '';
             const chatBtn = showChatBtn
-                ? `<button class="btn-match btn-match-accent" onclick="openChat(${entry.id})">AI chat</button>`
+                ? `<button class="btn-match btn-match-accent" onclick="openChat('${pid}')">AI chat</button>`
                 : '';
             return `
                 <article class="card">
@@ -336,7 +342,7 @@
                         <div class="card-actions">
                             ${scoreHtml}
                             <span class="badge ${badgeClass}">${t(entry.entry_type)}</span>
-                            <button class="btn-match" onclick="findMatch(${entry.id})">Find match</button>
+                            <button class="btn-match" onclick="findMatch('${pid}')">Find match</button>
                             ${chatBtn}
                         </div>
                     </div>
@@ -357,13 +363,13 @@
         });
 
         // ==================== Find Match ====================
-        async function findMatch(entryId) {
+        async function findMatch(publicId) {
             const modal = document.getElementById('match-modal');
             const results = document.getElementById('modal-results');
             modal.classList.add('active');
             results.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
 
-            const res = await fetch(`/api/match/${entryId}`);
+            const res = await fetch(`/api/match/${encodeURIComponent(publicId)}`);
             const matches = await res.json();
 
             if (matches.length === 0) {
@@ -415,8 +421,8 @@
             const formData = new FormData(e.target);
             const res = await fetch('/api/entries', { method: 'POST', body: formData });
             const result = await res.json();
-            if (result.id) {
-                addMyEntryId(result.id);
+            if (result.public_id) {
+                addMyEntryId(result.public_id);
                 loadEntries();
                 const wantChat = confirm(
                     'Registration successful!\n\n' +
@@ -427,7 +433,7 @@
                 if (wantChat) {
                     document.querySelector('[data-tab="my-entries"]').click();
                     // Small delay to let tab switch, then open chat
-                    setTimeout(() => openChat(result.id), 100);
+                    setTimeout(() => openChat(result.public_id), 100);
                 } else {
                     document.querySelector('[data-tab="my-entries"]').click();
                 }
@@ -455,7 +461,7 @@
             const entries = [];
             for (const id of ids) {
                 try {
-                    const res = await fetch(`/api/entries/${id}`);
+                    const res = await fetch(`/api/entries/${encodeURIComponent(id)}`);
                     if (res.ok) entries.push(await res.json());
                 } catch {}
             }
@@ -481,7 +487,7 @@
         // ==================== AI Chat ====================
         let chatHistory = [];
         let chatActive = false;
-        let chatEntryId = null;
+        let chatPublicId = null;
 
         function getChatEntryInfo() {
             return {
@@ -495,11 +501,11 @@
             };
         }
 
-        async function openChat(entryId) {
+        async function openChat(publicId) {
             // Load entry data
-            const res = await fetch(`/api/entries/${entryId}`);
+            const res = await fetch(`/api/entries/${encodeURIComponent(publicId)}`);
             const entry = await res.json();
-            chatEntryId = entryId;
+            chatPublicId = publicId;
 
             // Fill sidebar form
             document.querySelectorAll('input[name="chat-type"]').forEach(r => {
@@ -517,7 +523,7 @@
             document.getElementById('chat-panel').style.display = 'block';
 
             const badge = document.getElementById('chat-entry-badge');
-            badge.textContent = `${entry.name || 'Entry'} (ID: ${entryId})`;
+            badge.textContent = entry.name || 'Entry';
 
             // Start chat
             chatHistory = [];
@@ -580,7 +586,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    entry_id: chatEntryId,
+                    public_id: chatPublicId,
                     entry_info: getChatEntryInfo(),
                     messages: messages,
                 }),
@@ -590,10 +596,10 @@
         }
 
         async function saveUpdates() {
-            if (!chatEntryId) return;
+            if (!chatPublicId) return;
             const info = getChatEntryInfo();
             try {
-                const res = await fetch(`/api/entries/${chatEntryId}`, {
+                const res = await fetch(`/api/entries/${encodeURIComponent(chatPublicId)}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(info),

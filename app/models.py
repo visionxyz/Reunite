@@ -20,7 +20,8 @@ class Gender(str, Enum):
 
 @dataclass
 class Entry:
-    id: Optional[int] = None
+    id: Optional[int] = None  # Internal SQLite PK; never exposed to clients
+    public_id: str = ""  # Opaque random ID exposed in URLs, localStorage, etc.
     entry_type: str = ""  # EntryType value
     name: str = ""  # Name or alias
     gender: str = ""  # Gender value
@@ -47,7 +48,10 @@ class Entry:
         return "\n".join(p for p in parts if p)
 
     def to_dict(self) -> dict:
-        return asdict(self)
+        """Public dict — drops the internal integer id; clients use public_id."""
+        d = asdict(self)
+        d.pop("id", None)
+        return d
 
 
 @dataclass

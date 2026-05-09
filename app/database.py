@@ -1,9 +1,19 @@
-"""SQLite database for entries (local metadata only, memories stored in EverMemOS)."""
+"""SQLite database for entries (local metadata only, memories stored in EverOS)."""
 
 import os
+import secrets
 import sqlite3
+import string
 from pathlib import Path
 from app.models import Entry
+
+_PUBLIC_ID_ALPHA = string.ascii_letters + string.digits  # 62 chars
+_PUBLIC_ID_LEN = 9  # ~53 bits entropy, ample for tens of thousands of entries
+
+
+def _generate_public_id() -> str:
+    """Opaque, non-sequential, URL-safe id like 'rnt_a8X3kp9Qe'."""
+    return "rnt_" + "".join(secrets.choice(_PUBLIC_ID_ALPHA) for _ in range(_PUBLIC_ID_LEN))
 
 # Use /tmp on Vercel (ephemeral), local data/ dir otherwise
 if os.environ.get("VERCEL"):
@@ -24,6 +34,7 @@ def init_db():
     conn.execute("""
         CREATE TABLE IF NOT EXISTS entries (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            public_id TEXT UNIQUE,
             entry_type TEXT NOT NULL,
             name TEXT DEFAULT '',
             gender TEXT DEFAULT '',
@@ -36,30 +47,65 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    # Migration: pre-existing schemas may not have public_id; add it idempotently.
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(entries)").fetchall()}
+    if "public_id" not in cols:
+        conn.execute("ALTER TABLE entries ADD COLUMN public_id TEXT")
+    # Backfill any rows missing a public_id
+    rows = conn.execute(
+        "SELECT id FROM entries WHERE public_id IS NULL OR public_id = ''"
+    ).fetchall()
+    for row in rows:
+        # Retry on the (astronomically unlikely) collision
+        for _ in range(5):
+            try:
+                conn.execute(
+                    "UPDATE entries SET public_id = ? WHERE id = ?",
+                    (_generate_public_id(), row[0]),
+                )
+                break
+            except sqlite3.IntegrityError:
+                continue
+    conn.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_entries_public_id ON entries(public_id)"
+    )
     conn.commit()
     conn.close()
 
 
 def insert_entry(entry: Entry) -> int:
     conn = get_db()
-    cursor = conn.execute(
-        """INSERT INTO entries (entry_type, name, gender, birth_date, missing_date,
-           location, physical_features, description, contact)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (
-            entry.entry_type,
-            entry.name,
-            entry.gender,
-            entry.birth_date,
-            entry.missing_date,
-            entry.location,
-            entry.physical_features,
-            entry.description,
-            entry.contact,
-        ),
-    )
+    public_id = entry.public_id or _generate_public_id()
+    # Retry once on collision (extremely unlikely)
+    for _ in range(5):
+        try:
+            cursor = conn.execute(
+                """INSERT INTO entries (public_id, entry_type, name, gender, birth_date,
+                   missing_date, location, physical_features, description, contact)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    public_id,
+                    entry.entry_type,
+                    entry.name,
+                    entry.gender,
+                    entry.birth_date,
+                    entry.missing_date,
+                    entry.location,
+                    entry.physical_features,
+                    entry.description,
+                    entry.contact,
+                ),
+            )
+            break
+        except sqlite3.IntegrityError:
+            public_id = _generate_public_id()
+    else:
+        conn.close()
+        raise RuntimeError("Failed to allocate a unique public_id after 5 retries")
     conn.commit()
     entry_id = cursor.lastrowid
+    entry.id = entry_id
+    entry.public_id = public_id
     conn.close()
     return entry_id
 
@@ -80,8 +126,20 @@ def get_all_entries(entry_type: str | None = None) -> list[Entry]:
 
 
 def get_entry(entry_id: int) -> Entry | None:
+    """Internal lookup by integer PK. Use get_entry_by_public_id for client-facing paths."""
     conn = get_db()
     row = conn.execute("SELECT * FROM entries WHERE id = ?", (entry_id,)).fetchone()
+    conn.close()
+    return _row_to_entry(row) if row else None
+
+
+def get_entry_by_public_id(public_id: str) -> Entry | None:
+    if not public_id:
+        return None
+    conn = get_db()
+    row = conn.execute(
+        "SELECT * FROM entries WHERE public_id = ?", (public_id,)
+    ).fetchone()
     conn.close()
     return _row_to_entry(row) if row else None
 
@@ -107,6 +165,7 @@ def update_entry(entry_id: int, **fields) -> bool:
 def _row_to_entry(row: sqlite3.Row) -> Entry:
     return Entry(
         id=row["id"],
+        public_id=row["public_id"] or "",
         entry_type=row["entry_type"],
         name=row["name"],
         gender=row["gender"],

@@ -70,9 +70,9 @@ async def list_entries(entry_type: str | None = None):
     return [e.to_dict() for e in entries]
 
 
-@app.get("/api/entries/{entry_id}")
-async def get_entry(entry_id: int):
-    entry = db.get_entry(entry_id)
+@app.get("/api/entries/{public_id}")
+async def get_entry(public_id: str):
+    entry = db.get_entry_by_public_id(public_id)
     if not entry:
         return JSONResponse({"error": "Not found"}, status_code=404)
     return entry.to_dict()
@@ -101,21 +101,20 @@ async def create_entry(
         description=description,
         contact=contact,
     )
-    entry_id = db.insert_entry(entry)
-    entry.id = entry_id
+    db.insert_entry(entry)  # populates entry.id and entry.public_id
     matching.store_memory(entry)
-    return {"id": entry_id, "message": "登记成功"}
+    return {"public_id": entry.public_id, "message": "登记成功"}
 
 
-@app.put("/api/entries/{entry_id}")
-async def update_entry(entry_id: int, payload: dict = Body(...)):
-    """Update an existing entry and refresh its EverMemOS memories."""
-    entry = db.get_entry(entry_id)
+@app.put("/api/entries/{public_id}")
+async def update_entry(public_id: str, payload: dict = Body(...)):
+    """Update an existing entry and refresh its EverOS memories."""
+    entry = db.get_entry_by_public_id(public_id)
     if not entry:
         return JSONResponse({"error": "Not found"}, status_code=404)
 
-    db.update_entry(entry_id, **payload)
-    updated = db.get_entry(entry_id)
+    db.update_entry(entry.id, **payload)
+    updated = db.get_entry(entry.id)
 
     # Re-store in EverOS with updated info — clear stale memories first
     matching.delete_memory(updated)
@@ -124,9 +123,9 @@ async def update_entry(entry_id: int, payload: dict = Body(...)):
     return updated.to_dict()
 
 
-@app.get("/api/match/{entry_id}")
-async def match_entry(entry_id: int, top_k: int = 10, min_score: float = matching.DEFAULT_MIN_SCORE):
-    entry = db.get_entry(entry_id)
+@app.get("/api/match/{public_id}")
+async def match_entry(public_id: str, top_k: int = 10, min_score: float = matching.DEFAULT_MIN_SCORE):
+    entry = db.get_entry_by_public_id(public_id)
     if not entry:
         return JSONResponse({"error": "Not found"}, status_code=404)
     results = matching.find_matches(entry, top_k=top_k, min_score=min_score)
@@ -164,30 +163,25 @@ async def search(
 @app.post("/api/chat")
 async def chat_with_assistant(payload: dict = Body(...)):
     """AI assistant conversation to guide users in recalling details."""
-    entry_id = payload.get("entry_id")
+    public_id = payload.get("public_id")
     entry_info = payload.get("entry_info", {})
     messages = payload.get("messages", [])
 
-    # If entry_id provided, load existing entry info as base
-    if entry_id:
-        existing = db.get_entry(entry_id)
-        if existing:
-            base = existing.to_dict()
-            base.update({k: v for k, v in entry_info.items() if v})
-            entry_info = base
+    entry = db.get_entry_by_public_id(public_id) if public_id else None
+    if entry:
+        base = entry.to_dict()
+        base.update({k: v for k, v in entry_info.items() if v})
+        entry_info = base
 
-    reply = await assistant.chat(entry_id, entry_info, messages)
+    reply = await assistant.chat(entry.id if entry else None, entry_info, messages)
 
-    # If entry_id provided and user sent a message, append it as new memory
-    if entry_id and messages:
-        last_user_msg = None
-        for m in reversed(messages):
-            if m.get("role") == "user":
-                last_user_msg = m["content"]
-                break
+    # Append the latest user turn as additional memory for this entry
+    if entry and messages:
+        last_user_msg = next(
+            (m["content"] for m in reversed(messages) if m.get("role") == "user"),
+            None,
+        )
         if last_user_msg:
-            entry = db.get_entry(entry_id)
-            if entry:
-                matching.store_chat_memory(entry, last_user_msg)
+            matching.store_chat_memory(entry, last_user_msg)
 
     return {"reply": reply}
