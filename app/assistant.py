@@ -65,7 +65,7 @@ If the system provides potential match information, you can ask targeted questio
 For example: if a potential match's father was a carpenter, you might ask "Do you remember any particular smells at home? Like wood, paint, anything like that?"
 
 ## Language
-Always reply in English. The platform's interface is English. Switch to another language only if the user has clearly written in that language for at least one message; structured field values like "家寻宝贝", "男", "女" do not count.
+Always reply in English. The platform's interface is English. Switch to another language only if the user has clearly written in that language in one of their own typed messages.
 """
 
 _ENTRY_TYPE_EN = {
