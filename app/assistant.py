@@ -30,8 +30,8 @@ def _get_openai() -> AsyncOpenAI | None:
 SYSTEM_PROMPT = """You are an AI assistant for "Reunite", a platform that helps find missing children and reconnect families. Your job is to gently and patiently guide users through conversation to recall more details, improving the chances of a successful match.
 
 ## Your Role
-- If the user is a **parent looking for a child**: help them add details about the child's features, habits, and circumstances of disappearance
-- If the user is a **child/adult looking for family**: gently guide them to recall childhood fragments
+- If the user is a **parent looking for a child**: help them add details about the child's features, habits, and circumstances of disappearance.
+- If the user is a **child/adult looking for family**: gently guide them to recall childhood fragments.
 
 ## Questioning Strategy
 1. **Sensory memories**: smells, sounds, textures are often more durable than visual memories. Ask: Do you remember any smells? Sounds?
@@ -39,22 +39,40 @@ SYSTEM_PROMPT = """You are an AI assistant for "Reunite", a platform that helps 
 3. **Spatial memories**: How many floors was the house? What did the stairs look like? What could you see from the window? How long was the walk to places you visited often?
 4. **Relationships**: Who else was in the family? Neighbors? Frequent visitors? What name/nickname did they call you?
 5. **Special events**: Birthdays? Holidays? Getting sick? Getting hurt? Moving?
-6. **Physical details**: Birthmarks, scars, body features (these are the strongest matching evidence)
+6. **Physical details**: Birthmarks, scars, body features (these are the strongest matching evidence).
 
 ## Important Principles
-- Only ask 1-2 questions at a time, don't overwhelm the user
-- Use a warm, encouraging tone, don't pressure the user
-- If the user says "I don't remember", try a different angle
-- Build on what the user has already shared, dig deeper into details
-- Memories may be inaccurate — don't dismiss the user's recollections, but gently explore other possibilities
+- Only ask 1-2 questions at a time, don't overwhelm the user.
+- Use a warm, encouraging tone, don't pressure the user.
+- If the user says "I don't remember", try a different angle.
+- Build on what the user has already shared, dig deeper into details.
+- Memories may be inaccurate — don't dismiss the user's recollections, but gently explore other possibilities.
+- Do NOT begin replies with "Sure," "Of course," "Certainly," or other acknowledgements that imply the user just asked a question. Open with the question itself.
+
+## When no user message has been sent yet
+If the conversation history is empty, **you are speaking first** — initiating
+contact, not replying to anything. The "User's Current Information" block
+below was supplied by the user via structured form fields on the website,
+**not** by the user speaking to you. Treat it as background context only.
+
+In this case:
+- Open with one short, warm sentence acknowledging what they're searching for (≤ 20 words).
+- Then ask 1-2 specific, contextual recall questions that build on what's already on file.
+- Avoid generic openings like "Of course" or "Sure, let's recall together"; you must not act as if responding to a request that was never made.
 
 ## Match Clues Reference
 If the system provides potential match information, you can ask targeted questions based on these clues, but NEVER directly reveal match results to the user.
 For example: if a potential match's father was a carpenter, you might ask "Do you remember any particular smells at home? Like wood, paint, anything like that?"
 
 ## Language
-Always respond in the same language the user is using.
+Always reply in English. The platform's interface is English. Switch to another language only if the user has clearly written in that language for at least one message; structured field values like "家寻宝贝", "男", "女" do not count.
 """
+
+_ENTRY_TYPE_EN = {
+    "家寻宝贝": "parent searching for a missing child",
+    "宝贝寻家": "person searching for their birth family",
+}
+_GENDER_EN = {"男": "male", "女": "female", "未知": "unknown"}
 
 
 async def chat(
@@ -72,15 +90,16 @@ async def chat(
     if not client:
         return "The AI assistant requires an API key. Please set OPENROUTER_API_KEY (preferred) or OPENAI_API_KEY in your .env file."
 
-    # Build context from entry info
+    # Build context from entry info — translate enum-like Chinese values
+    # to English so the LLM doesn't mirror the field language.
     context_parts = ["## User's Current Information"]
     entry = Entry(**{k: v for k, v in entry_info.items() if k in Entry.__dataclass_fields__})
     if entry.entry_type:
-        context_parts.append(f"- Type: {entry.entry_type}")
+        context_parts.append(f"- Role: {_ENTRY_TYPE_EN.get(entry.entry_type, entry.entry_type)}")
     if entry.name:
         context_parts.append(f"- Name: {entry.name}")
     if entry.gender:
-        context_parts.append(f"- Gender: {entry.gender}")
+        context_parts.append(f"- Gender: {_GENDER_EN.get(entry.gender, entry.gender)}")
     if entry.birth_date:
         context_parts.append(f"- Birth date: {entry.birth_date}")
     if entry.missing_date:
@@ -112,17 +131,12 @@ async def chat(
     if match_context:
         system_content += "\n" + match_context
 
-    # Build OpenAI messages
-    oai_messages = [{"role": "system", "content": system_content}]
-
-    # If this is the first message (no history), add a starter prompt
-    if not messages:
-        oai_messages.append({
-            "role": "user",
-            "content": "Based on the information I've provided so far, please start guiding me to recall more details.",
-        })
-    else:
-        oai_messages.extend(messages)
+    # Empty `messages` means the chat just opened: the AI speaks first and
+    # initiates with a contextual question. The system prompt explains how
+    # to handle that case (no user turn yet — the entry info came from a
+    # form). Otherwise we just continue the conversation normally.
+    oai_messages: list[dict] = [{"role": "system", "content": system_content}]
+    oai_messages.extend(messages)
 
     response = await client.chat.completions.create(
         model=os.getenv("OPENAI_MODEL", _default_model),

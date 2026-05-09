@@ -502,7 +502,10 @@
             const badge = document.getElementById('chat-entry-badge');
             badge.textContent = entry.name || 'Entry';
 
-            // Start chat
+            // Reset chat state. The AI initiates the conversation: it sees
+            // the entry context via system prompt and is told (in
+            // assistant.py SYSTEM_PROMPT) that the form data was filled,
+            // not spoken, so it should open with a contextual question.
             chatHistory = [];
             chatActive = true;
             const container = document.getElementById('chat-messages');
@@ -516,11 +519,13 @@
             try {
                 const reply = await callChat([]);
                 removeTyping();
-                chatHistory.push({ role: 'assistant', content: reply });
-                appendMessage('assistant', reply);
+                if (reply) {
+                    chatHistory.push({ role: 'assistant', content: reply });
+                    appendMessage('assistant', reply);
+                }
             } catch (e) {
                 removeTyping();
-                appendMessage('assistant', 'Sorry, connection error. Please check that the OpenAI API Key is configured.');
+                appendMessage('assistant', "Sorry — I couldn't reach the assistant. Check that OPENROUTER_API_KEY (or OPENAI_API_KEY) is set.");
             }
         }
 
