@@ -131,19 +131,36 @@ def insert_entry(entry: Entry) -> int:
     return entry_id
 
 
-def get_all_entries(entry_type: str | None = None) -> list[Entry]:
+def get_all_entries(
+    entry_type: str | None = None,
+    limit: int | None = None,
+    offset: int = 0,
+) -> list[Entry]:
     conn = get_db()
+    sql = "SELECT * FROM entries"
+    params: list = []
     if entry_type:
-        rows = conn.execute(
-            "SELECT * FROM entries WHERE entry_type = ? ORDER BY created_at DESC",
-            (entry_type,),
-        ).fetchall()
-    else:
-        rows = conn.execute(
-            "SELECT * FROM entries ORDER BY created_at DESC"
-        ).fetchall()
+        sql += " WHERE entry_type = ?"
+        params.append(entry_type)
+    sql += " ORDER BY created_at DESC, id DESC"
+    if limit is not None:
+        sql += " LIMIT ? OFFSET ?"
+        params.extend([limit, offset])
+    rows = conn.execute(sql, params).fetchall()
     conn.close()
     return [_row_to_entry(r) for r in rows]
+
+
+def count_entries(entry_type: str | None = None) -> int:
+    conn = get_db()
+    if entry_type:
+        row = conn.execute(
+            "SELECT COUNT(*) FROM entries WHERE entry_type = ?", (entry_type,)
+        ).fetchone()
+    else:
+        row = conn.execute("SELECT COUNT(*) FROM entries").fetchone()
+    conn.close()
+    return row[0] if row else 0
 
 
 def get_entry(entry_id: int) -> Entry | None:

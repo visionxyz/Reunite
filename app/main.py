@@ -21,7 +21,7 @@ _db_ready = False
 
 
 def _ensure_db():
-    """Init DB and load mock data if empty."""
+    """Init DB, load mock data if empty, backfill suggestions if missing."""
     global _db_ready
     if _db_ready:
         return
@@ -29,21 +29,27 @@ def _ensure_db():
     existing = db.get_all_entries()
     if not existing:
         print("Loading mock data...")
-        seeded = []
         for entry in PARENT_ENTRIES + CHILD_ENTRIES:
             db.insert_entry(entry)  # populates entry.id and entry.public_id
             if not IS_VERCEL:
                 matching.store_memory(entry)
-            seeded.append(entry.public_id)
         print(f"Loaded {len(PARENT_ENTRIES)} parent entries and {len(CHILD_ENTRIES)} child entries.")
-        # Seed suggestions table so demo has cached matches without waiting
-        # for a registration to trigger background work.
-        if not IS_VERCEL:
-            for pid in seeded:
+        existing = db.get_all_entries()  # re-read with public_ids populated
+
+    # Self-heal: any entry without cached suggestions gets one computed now.
+    # Triggered after the initial mock-data load, after a schema migration
+    # that added the suggestions table, or after a manual DB edit.
+    # Runs only locally — Vercel's 10s function budget can't absorb 50+
+    # EverOS calls on startup.
+    if not IS_VERCEL:
+        missing = [e.public_id for e in existing if not db.get_suggestions(e.public_id)]
+        if missing:
+            print(f"Backfilling suggestions for {len(missing)} entries (one-time)...")
+            for pid in missing:
                 try:
                     _background_match(pid)
                 except Exception as e:
-                    print(f"[seed suggestions] {pid}: {e}")
+                    print(f"  [seed {pid}]: {e}")
     _db_ready = True
 
 
@@ -81,11 +87,34 @@ def _public_listing_dict(entry) -> dict:
     return d
 
 
-@app.get("/api/entries")
-async def list_entries(entry_type: str | None = None):
+@app.get("/api/stats")
+async def get_stats():
     _ensure_db()
-    entries = db.get_all_entries(entry_type=entry_type)
-    return [_public_listing_dict(e) for e in entries]
+    parents = db.count_entries(entry_type="parent_seeking")
+    children = db.count_entries(entry_type="child_seeking")
+    return {"parents": parents, "children": children, "total": parents + children}
+
+
+@app.get("/api/entries")
+async def list_entries(
+    entry_type: str | None = None,
+    page: int = 1,
+    page_size: int = 10,
+):
+    _ensure_db()
+    page = max(1, page)
+    page_size = max(1, min(50, page_size))  # cap at 50 to avoid runaway pulls
+    total = db.count_entries(entry_type=entry_type)
+    offset = (page - 1) * page_size
+    entries = db.get_all_entries(entry_type=entry_type, limit=page_size, offset=offset)
+    total_pages = max(1, (total + page_size - 1) // page_size)
+    return {
+        "items": [_public_listing_dict(e) for e in entries],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": total_pages,
+    }
 
 
 def _background_match(public_id: str) -> None:

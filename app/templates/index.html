@@ -60,6 +60,7 @@
             <div id="entries-list">
                 <div class="skel"></div><div class="skel"></div><div class="skel"></div>
             </div>
+            <nav id="entries-pagination" class="pagination" aria-label="Browse pagination"></nav>
         </div>
 
         <!-- Register Tab -->
@@ -245,21 +246,45 @@
         });
 
         // ==================== Browse ====================
-        async function loadEntries(type = '') {
-            const url = type ? `/api/entries?entry_type=${encodeURIComponent(type)}` : '/api/entries';
-            const res = await fetch(url);
-            const entries = await res.json();
-            renderEntries(entries, 'entries-list', false);
+        const PAGE_SIZE = 10;
+        let browseState = { type: '', page: 1 };
+
+        async function loadEntries(type = browseState.type, page = 1) {
+            browseState = { type, page };
+            const params = new URLSearchParams({ page: String(page), page_size: String(PAGE_SIZE) });
+            if (type) params.set('entry_type', type);
+            const res = await fetch(`/api/entries?${params}`);
+            const data = await res.json();
+            renderEntries(data.items, 'entries-list', false);
+            renderPagination(data);
             updateStats();
         }
 
+        function renderPagination({ page, total_pages, total }) {
+            const container = document.getElementById('entries-pagination');
+            if (!container) return;
+            if (total_pages <= 1) {
+                container.innerHTML = total
+                    ? `<span class="pagination-meta">${total} entries</span>`
+                    : '';
+                return;
+            }
+            const prevDisabled = page <= 1 ? 'disabled' : '';
+            const nextDisabled = page >= total_pages ? 'disabled' : '';
+            container.innerHTML = `
+                <button class="btn btn-secondary" ${prevDisabled} onclick="loadEntries(browseState.type, ${page - 1})">&larr; Prev</button>
+                <span class="pagination-meta tnum">Page ${page} of ${total_pages} · ${total} entries</span>
+                <button class="btn btn-secondary" ${nextDisabled} onclick="loadEntries(browseState.type, ${page + 1})">Next &rarr;</button>
+            `;
+        }
+
         async function updateStats() {
-            const all = await (await fetch('/api/entries')).json();
-            const parents = all.filter(e => e.entry_type === 'parent_seeking');
-            const children = all.filter(e => e.entry_type === 'child_seeking');
-            document.getElementById('stat-parent').textContent = parents.length;
-            document.getElementById('stat-child').textContent = children.length;
-            document.getElementById('stat-total').textContent = all.length;
+            try {
+                const s = await (await fetch('/api/stats')).json();
+                document.getElementById('stat-parent').textContent = s.parents;
+                document.getElementById('stat-child').textContent = s.children;
+                document.getElementById('stat-total').textContent = s.total;
+            } catch {}
         }
 
         function renderEntries(entries, containerId, showChatBtn) {
@@ -318,7 +343,7 @@
         }
 
         document.querySelectorAll('input[name="browse-type"]').forEach(radio => {
-            radio.addEventListener('change', () => loadEntries(radio.value));
+            radio.addEventListener('change', () => loadEntries(radio.value, 1));
         });
 
         // ==================== Find Match ====================
