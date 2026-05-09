@@ -6,7 +6,7 @@
 
 **Video Demo:** [Reunite_Final_Video.mp4](Reunite_Final_Video.mp4)
 
-> **Note:** The live demo uses synthetic mock data to protect privacy. All names, locations, and descriptions are fictional.
+> **Demo only — data is not persisted.** The live deployment runs on Vercel's serverless platform with an ephemeral filesystem (`/tmp`). The SQLite database is re-seeded from `app/mock_data.py` on every cold start, so any entries you register will disappear within hours. All seeded names, locations, and descriptions are fictional. Do **not** submit real personal information.
 
 ---
 
