@@ -121,30 +121,35 @@ h4 { font-size: 1rem; }
 }
 .demo-tag {
     font-size: 0.75rem;
-    color: var(--accent-hover);
-    background: var(--accent-soft);
-    padding: 0.25rem 0.625rem;
+    color: white;
+    background: #DC2626;
+    padding: 0.3rem 0.75rem;
     border-radius: 999px;
-    font-weight: 500;
-    border: 1px solid rgba(191, 107, 69, 0.25);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    box-shadow: 0 1px 3px rgba(220, 38, 38, 0.3);
     white-space: nowrap;
 }
 @media (max-width: 600px) {
-    .demo-tag { display: none; }
+    .demo-tag {
+        font-size: 0.6875rem;
+        padding: 0.25rem 0.5rem;
+    }
 }
 
 .demo-notice {
     margin: -0.5rem 0 1.25rem;
     padding: 0.875rem 1rem;
-    background: var(--accent-soft);
-    border: 1px solid rgba(191, 107, 69, 0.25);
-    border-left: 3px solid var(--accent);
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-left: 3px solid #DC2626;
     border-radius: var(--r-sm);
     font-size: 0.875rem;
-    color: var(--ink);
+    color: #7F1D1D;
     line-height: 1.55;
 }
-.demo-notice strong { color: var(--accent-hover); font-weight: 600; }
+.demo-notice strong { color: #991B1B; font-weight: 700; }
 
 .hero {
     max-width: 1200px;
