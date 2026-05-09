@@ -4,7 +4,7 @@ import os
 import traceback
 from pathlib import Path
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Form, Body
+from fastapi import FastAPI, Request, Form, Body, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -29,12 +29,21 @@ def _ensure_db():
     existing = db.get_all_entries()
     if not existing:
         print("Loading mock data...")
+        seeded = []
         for entry in PARENT_ENTRIES + CHILD_ENTRIES:
-            entry_id = db.insert_entry(entry)
-            entry.id = entry_id
+            db.insert_entry(entry)  # populates entry.id and entry.public_id
             if not IS_VERCEL:
                 matching.store_memory(entry)
+            seeded.append(entry.public_id)
         print(f"Loaded {len(PARENT_ENTRIES)} parent entries and {len(CHILD_ENTRIES)} child entries.")
+        # Seed suggestions table so demo has cached matches without waiting
+        # for a registration to trigger background work.
+        if not IS_VERCEL:
+            for pid in seeded:
+                try:
+                    _background_match(pid)
+                except Exception as e:
+                    print(f"[seed suggestions] {pid}: {e}")
     _db_ready = True
 
 
@@ -63,11 +72,34 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+def _public_listing_dict(entry) -> dict:
+    """Public listing: strip identifiers so visitors can't trigger Find match
+    against entries they don't own. The listing is read-only display only."""
+    d = entry.to_dict()
+    d.pop("public_id", None)
+    d.pop("contact", None)  # contact info is private to owner
+    return d
+
+
 @app.get("/api/entries")
 async def list_entries(entry_type: str | None = None):
     _ensure_db()
     entries = db.get_all_entries(entry_type=entry_type)
-    return [e.to_dict() for e in entries]
+    return [_public_listing_dict(e) for e in entries]
+
+
+def _background_match(public_id: str) -> None:
+    """Compute matches for an entry and stash them as suggestions."""
+    entry = db.get_entry_by_public_id(public_id)
+    if not entry:
+        return
+    try:
+        results = matching.find_matches(entry, top_k=10)
+    except Exception as e:
+        print(f"[background_match] error for {public_id}: {e}")
+        return
+    pairs = [(r.entry.public_id, round(r.score, 4)) for r in results if r.entry.public_id]
+    db.replace_suggestions(public_id, pairs)
 
 
 @app.get("/api/entries/{public_id}")
@@ -80,6 +112,7 @@ async def get_entry(public_id: str):
 
 @app.post("/api/entries")
 async def create_entry(
+    background_tasks: BackgroundTasks,
     entry_type: str = Form(...),
     name: str = Form(""),
     gender: str = Form(""),
@@ -103,11 +136,13 @@ async def create_entry(
     )
     db.insert_entry(entry)  # populates entry.id and entry.public_id
     matching.store_memory(entry)
+    # Fire-and-forget: compute potential matches and stash as suggestions.
+    background_tasks.add_task(_background_match, entry.public_id)
     return {"public_id": entry.public_id, "message": "登记成功"}
 
 
 @app.put("/api/entries/{public_id}")
-async def update_entry(public_id: str, payload: dict = Body(...)):
+async def update_entry(public_id: str, background_tasks: BackgroundTasks, payload: dict = Body(...)):
     """Update an existing entry and refresh its EverOS memories."""
     entry = db.get_entry_by_public_id(public_id)
     if not entry:
@@ -120,7 +155,22 @@ async def update_entry(public_id: str, payload: dict = Body(...)):
     matching.delete_memory(updated)
     matching.store_memory(updated)
 
+    # Recompute suggestions so the owner sees fresh matches next time.
+    background_tasks.add_task(_background_match, public_id)
+
     return updated.to_dict()
+
+
+@app.get("/api/suggestions/{public_id}")
+async def get_suggestions(public_id: str):
+    """Return cached background-matched suggestions for an owner's entry."""
+    if not db.get_entry_by_public_id(public_id):
+        return JSONResponse({"error": "Not found"}, status_code=404)
+    pairs = db.get_suggestions(public_id)
+    return [
+        {"entry": entry.to_dict(), "score": score}
+        for entry, score in pairs
+    ]
 
 
 @app.get("/api/match/{public_id}")

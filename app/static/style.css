@@ -494,6 +494,41 @@ h4 { font-size: 1rem; }
 .empty p { font-size: 0.9375rem; max-width: 44ch; margin: 0 auto 0.5rem; }
 .empty .btn { margin-top: 1.25rem; }
 
+/* suggestions panel under My Entries */
+.suggestions {
+    margin: -0.5rem 0 1.5rem 1.5rem;
+    padding: 1rem 1.25rem 0.5rem;
+    border-left: 2px solid var(--accent);
+    background: linear-gradient(90deg, var(--surface-warm) 0%, transparent 100%);
+    border-radius: 0 var(--r-md) var(--r-md) 0;
+}
+.suggestions-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.625rem;
+    flex-wrap: wrap;
+}
+.suggestions-header h4 {
+    font-size: 0.8125rem;
+    color: var(--accent-hover);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+.suggestions-hint {
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+}
+.suggestions-body .card { margin-bottom: 0.625rem; }
+.suggestions-empty {
+    padding: 0.75rem 0;
+    font-size: 0.875rem;
+    color: var(--ink-muted);
+    font-style: italic;
+}
+
 /* skeleton loader */
 .skel {
     height: 96px;

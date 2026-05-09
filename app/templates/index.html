@@ -332,9 +332,14 @@
                 scoreHtml = `<span class="score-badge ${cls}"><span>${label}</span><span class="score-label">${pct}%</span></span>`;
             }
             const pid = entry.public_id || '';
-            const chatBtn = showChatBtn
-                ? `<button class="btn-match btn-match-accent" onclick="openChat('${pid}')">AI chat</button>`
-                : '';
+            // Find-match and AI-chat are owner-only actions. Public Browse
+            // shows cards in display-only mode; Match-modal results show no
+            // buttons either (they're just possible matches, not your entries).
+            const isOwner = showChatBtn;
+            const findBtn = isOwner && pid
+                ? `<button class="btn-match" onclick="findMatch('${pid}')">Find match</button>` : '';
+            const chatBtn = isOwner && pid
+                ? `<button class="btn-match btn-match-accent" onclick="openChat('${pid}')">AI chat</button>` : '';
             return `
                 <article class="card">
                     <div class="card-header">
@@ -342,7 +347,7 @@
                         <div class="card-actions">
                             ${scoreHtml}
                             <span class="badge ${badgeClass}">${t(entry.entry_type)}</span>
-                            <button class="btn-match" onclick="findMatch('${pid}')">Find match</button>
+                            ${findBtn}
                             ${chatBtn}
                         </div>
                     </div>
@@ -475,7 +480,46 @@
                 return;
             }
 
-            container.innerHTML = entries.map(e => renderCard(e, null, true)).join('');
+            container.innerHTML = entries.map(renderMyEntryBlock).join('');
+            // Lazy-fetch cached suggestions for each entry
+            entries.forEach(loadSuggestionsFor);
+        }
+
+        function renderMyEntryBlock(entry) {
+            const slotId = 'sug-' + (entry.public_id || '').replace(/[^A-Za-z0-9_]/g, '');
+            return `
+                ${renderCard(entry, null, true)}
+                <section class="suggestions" id="${slotId}">
+                    <header class="suggestions-header">
+                        <h4>Suggested matches</h4>
+                        <span class="suggestions-hint">Auto-updated when you register or save changes</span>
+                    </header>
+                    <div class="suggestions-body"><div class="skel"></div></div>
+                </section>
+            `;
+        }
+
+        async function loadSuggestionsFor(entry) {
+            const pid = entry.public_id;
+            if (!pid) return;
+            const slotId = 'sug-' + pid.replace(/[^A-Za-z0-9_]/g, '');
+            const slot = document.querySelector('#' + slotId + ' .suggestions-body');
+            if (!slot) return;
+            try {
+                const res = await fetch(`/api/suggestions/${encodeURIComponent(pid)}`);
+                if (!res.ok) {
+                    slot.innerHTML = '<div class="suggestions-empty">Could not load suggestions.</div>';
+                    return;
+                }
+                const sugs = await res.json();
+                if (sugs.length === 0) {
+                    slot.innerHTML = '<div class="suggestions-empty">No matches above the confidence threshold yet. We\'ll keep checking — try adding more details to widen the search.</div>';
+                    return;
+                }
+                slot.innerHTML = sugs.map(s => renderCard(s.entry, s.score)).join('');
+            } catch (e) {
+                slot.innerHTML = '<div class="suggestions-empty">Could not load suggestions.</div>';
+            }
         }
 
         function backToMyEntries() {

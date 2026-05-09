@@ -69,6 +69,20 @@ def init_db():
     conn.execute(
         "CREATE UNIQUE INDEX IF NOT EXISTS idx_entries_public_id ON entries(public_id)"
     )
+    # Background-matching results: per-owner queue of suggested matches.
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS suggestions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            owner_public_id TEXT NOT NULL,
+            matched_public_id TEXT NOT NULL,
+            score REAL NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(owner_public_id, matched_public_id)
+        )
+    """)
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_suggestions_owner ON suggestions(owner_public_id)"
+    )
     conn.commit()
     conn.close()
 
@@ -160,6 +174,36 @@ def update_entry(entry_id: int, **fields) -> bool:
     conn.commit()
     conn.close()
     return True
+
+
+def replace_suggestions(owner_public_id: str, results: list[tuple[str, float]]) -> None:
+    """Replace the suggestion set for an owner with a fresh list of (public_id, score)."""
+    conn = get_db()
+    conn.execute("DELETE FROM suggestions WHERE owner_public_id = ?", (owner_public_id,))
+    if results:
+        conn.executemany(
+            "INSERT INTO suggestions (owner_public_id, matched_public_id, score) VALUES (?, ?, ?)",
+            [(owner_public_id, pid, score) for pid, score in results],
+        )
+    conn.commit()
+    conn.close()
+
+
+def get_suggestions(owner_public_id: str) -> list[tuple[Entry, float]]:
+    """Load the latest stored suggestions for an owner, joined to candidate entries."""
+    conn = get_db()
+    rows = conn.execute(
+        """SELECT e.*, s.score FROM suggestions s
+           JOIN entries e ON e.public_id = s.matched_public_id
+           WHERE s.owner_public_id = ?
+           ORDER BY s.score DESC""",
+        (owner_public_id,),
+    ).fetchall()
+    conn.close()
+    out: list[tuple[Entry, float]] = []
+    for r in rows:
+        out.append((_row_to_entry(r), r["score"]))
+    return out
 
 
 def _row_to_entry(row: sqlite3.Row) -> Entry:
