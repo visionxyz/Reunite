@@ -3,28 +3,25 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict
-from enum import Enum
 from typing import Optional
 
+# Canonical enum values stored in SQLite. All comparisons in matching.py,
+# assistant.py, and the frontend reference these strings literally.
+PARENT_SEEKING = "parent_seeking"   # parent looking for a missing child
+CHILD_SEEKING = "child_seeking"     # child/adult looking for their birth family
 
-class EntryType(str, Enum):
-    PARENT_SEEKING = "家寻宝贝"  # Parents looking for children
-    CHILD_SEEKING = "宝贝寻家"  # Children/adults looking for family
-
-
-class Gender(str, Enum):
-    MALE = "男"
-    FEMALE = "女"
-    UNKNOWN = "未知"
+GENDER_MALE = "male"
+GENDER_FEMALE = "female"
+GENDER_UNKNOWN = "unknown"
 
 
 @dataclass
 class Entry:
     id: Optional[int] = None  # Internal SQLite PK; never exposed to clients
     public_id: str = ""  # Opaque random ID exposed in URLs, localStorage, etc.
-    entry_type: str = ""  # EntryType value
+    entry_type: str = ""  # PARENT_SEEKING or CHILD_SEEKING
     name: str = ""  # Name or alias
-    gender: str = ""  # Gender value
+    gender: str = ""  # GENDER_MALE / GENDER_FEMALE / GENDER_UNKNOWN
     birth_date: str = ""  # Approximate birth date, e.g. "1995" or "1995-03"
     missing_date: str = ""  # When the child went missing
     location: str = ""  # Province/city of missing or remembered location
@@ -34,18 +31,19 @@ class Entry:
     created_at: str = ""
 
     def to_search_text(self) -> str:
-        """Combine all fields into a single text for embedding."""
-        parts = [
-            f"类型：{self.entry_type}",
-            f"姓名：{self.name}" if self.name else "",
-            f"性别：{self.gender}" if self.gender else "",
-            f"出生日期：{self.birth_date}" if self.birth_date else "",
-            f"失踪时间：{self.missing_date}" if self.missing_date else "",
-            f"地点：{self.location}" if self.location else "",
-            f"体貌特征：{self.physical_features}" if self.physical_features else "",
-            f"详细描述：{self.description}" if self.description else "",
-        ]
-        return "\n".join(p for p in parts if p)
+        """Compact, label-free text for keyword similarity fallback.
+        Skips fields that are noisy across parent/child wording (type, name,
+        gender, birth_date — those are handled by the hard filter)."""
+        parts = []
+        if self.physical_features:
+            parts.append(self.physical_features)
+        if self.location:
+            parts.append(self.location)
+        if self.description:
+            parts.append(self.description)
+        if self.missing_date:
+            parts.append(self.missing_date)
+        return "\n".join(parts)
 
     def to_dict(self) -> dict:
         """Public dict — drops the internal integer id; clients use public_id."""

@@ -1,4 +1,4 @@
-"""FastAPI application for Reunite - 团圆寻亲平台."""
+"""FastAPI application for Reunite - memory-based family search."""
 
 import os
 import traceback
@@ -138,7 +138,7 @@ async def create_entry(
     matching.store_memory(entry)
     # Fire-and-forget: compute potential matches and stash as suggestions.
     background_tasks.add_task(_background_match, entry.public_id)
-    return {"public_id": entry.public_id, "message": "登记成功"}
+    return {"public_id": entry.public_id, "message": "Registered successfully"}
 
 
 @app.put("/api/entries/{public_id}")

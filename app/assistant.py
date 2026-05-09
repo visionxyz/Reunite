@@ -68,11 +68,10 @@ For example: if a potential match's father was a carpenter, you might ask "Do yo
 Always reply in English. The platform's interface is English. Switch to another language only if the user has clearly written in that language in one of their own typed messages.
 """
 
-_ENTRY_TYPE_EN = {
-    "家寻宝贝": "parent searching for a missing child",
-    "宝贝寻家": "person searching for their birth family",
+_ENTRY_ROLE_PHRASE = {
+    "parent_seeking": "parent searching for a missing child",
+    "child_seeking": "person searching for their birth family",
 }
-_GENDER_EN = {"男": "male", "女": "female", "未知": "unknown"}
 
 
 async def chat(
@@ -95,11 +94,11 @@ async def chat(
     context_parts = ["## User's Current Information"]
     entry = Entry(**{k: v for k, v in entry_info.items() if k in Entry.__dataclass_fields__})
     if entry.entry_type:
-        context_parts.append(f"- Role: {_ENTRY_TYPE_EN.get(entry.entry_type, entry.entry_type)}")
+        context_parts.append(f"- Role: {_ENTRY_ROLE_PHRASE.get(entry.entry_type, entry.entry_type)}")
     if entry.name:
         context_parts.append(f"- Name: {entry.name}")
     if entry.gender:
-        context_parts.append(f"- Gender: {_GENDER_EN.get(entry.gender, entry.gender)}")
+        context_parts.append(f"- Gender: {entry.gender}")
     if entry.birth_date:
         context_parts.append(f"- Birth date: {entry.birth_date}")
     if entry.missing_date:

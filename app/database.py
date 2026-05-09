@@ -47,6 +47,13 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    # Migration: legacy Chinese enum values -> English canonical form.
+    # No-op once converted; safe to run on every startup.
+    conn.execute("UPDATE entries SET entry_type='parent_seeking' WHERE entry_type='家寻宝贝'")
+    conn.execute("UPDATE entries SET entry_type='child_seeking'  WHERE entry_type='宝贝寻家'")
+    conn.execute("UPDATE entries SET gender='male'    WHERE gender='男'")
+    conn.execute("UPDATE entries SET gender='female'  WHERE gender='女'")
+    conn.execute("UPDATE entries SET gender='unknown' WHERE gender='未知'")
     # Migration: pre-existing schemas may not have public_id; add it idempotently.
     cols = {row[1] for row in conn.execute("PRAGMA table_info(entries)").fetchall()}
     if "public_id" not in cols:

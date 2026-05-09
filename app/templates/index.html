@@ -51,9 +51,9 @@
             <div class="type-toggle">
                 <input type="radio" name="browse-type" id="browse-all" value="" checked>
                 <label for="browse-all">All</label>
-                <input type="radio" name="browse-type" id="browse-parent" value="家寻宝贝">
+                <input type="radio" name="browse-type" id="browse-parent" value="parent_seeking">
                 <label for="browse-parent">Parents Seeking</label>
-                <input type="radio" name="browse-type" id="browse-child" value="宝贝寻家">
+                <input type="radio" name="browse-type" id="browse-child" value="child_seeking">
                 <label for="browse-child">Children Seeking</label>
             </div>
             <div id="entries-list">
@@ -68,9 +68,9 @@
                 <p>Add what you remember. You can come back later via "My entries" to add more details or chat with the AI memory guide.</p>
                 <form id="register-form">
                     <div class="type-toggle">
-                        <input type="radio" name="entry_type" id="reg-parent" value="家寻宝贝" checked>
+                        <input type="radio" name="entry_type" id="reg-parent" value="parent_seeking" checked>
                         <label for="reg-parent">Parent Seeking Child</label>
-                        <input type="radio" name="entry_type" id="reg-child" value="宝贝寻家">
+                        <input type="radio" name="entry_type" id="reg-child" value="child_seeking">
                         <label for="reg-child">Child Seeking Family</label>
                     </div>
                     <div class="form-grid">
@@ -82,8 +82,8 @@
                             <label>Gender</label>
                             <select name="gender">
                                 <option value="">Select</option>
-                                <option value="男">Male</option>
-                                <option value="女">Female</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -137,9 +137,9 @@
                         <h3>Entry Information</h3>
                         <p class="chat-hint">The AI will guide you to recall more. New details are saved automatically.</p>
                         <div class="type-toggle">
-                            <input type="radio" name="chat-type" id="chat-parent" value="家寻宝贝" checked>
+                            <input type="radio" name="chat-type" id="chat-parent" value="parent_seeking" checked>
                             <label for="chat-parent">Parent Seeking</label>
-                            <input type="radio" name="chat-type" id="chat-child" value="宝贝寻家">
+                            <input type="radio" name="chat-type" id="chat-child" value="child_seeking">
                             <label for="chat-child">Child Seeking</label>
                         </div>
                         <div class="form-group">
@@ -150,8 +150,8 @@
                             <label>Gender</label>
                             <select id="chat-gender">
                                 <option value="">Unknown</option>
-                                <option value="男">Male</option>
-                                <option value="女">Female</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -204,10 +204,10 @@
 
     <script>
         const TYPE_LABELS = {
-            '家寻宝贝': 'Parent Seeking',
-            '宝贝寻家': 'Child Seeking',
-            '男': 'Male',
-            '女': 'Female',
+            'parent_seeking': 'Parent Seeking',
+            'child_seeking': 'Child Seeking',
+            'male': 'Male',
+            'female': 'Female',
         };
         function t(val) { return TYPE_LABELS[val] || val || 'Unknown'; }
 
@@ -251,8 +251,8 @@
 
         async function updateStats() {
             const all = await (await fetch('/api/entries')).json();
-            const parents = all.filter(e => e.entry_type === '家寻宝贝');
-            const children = all.filter(e => e.entry_type === '宝贝寻家');
+            const parents = all.filter(e => e.entry_type === 'parent_seeking');
+            const children = all.filter(e => e.entry_type === 'child_seeking');
             document.getElementById('stat-parent').textContent = parents.length;
             document.getElementById('stat-child').textContent = children.length;
             document.getElementById('stat-total').textContent = all.length;
@@ -272,7 +272,7 @@
         }
 
         function renderCard(entry, score = null, showChatBtn = false) {
-            const isParent = entry.entry_type === '家寻宝贝';
+            const isParent = entry.entry_type === 'parent_seeking';
             const badgeClass = isParent ? 'badge-parent' : 'badge-child';
             let scoreHtml = '';
             if (score !== null) {

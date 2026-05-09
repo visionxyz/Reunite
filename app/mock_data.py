@@ -32,9 +32,9 @@ PARENT_ENTRIES = [
 
     # Pair 0: Emma
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Emma Chen",
-        gender="女",
+        gender="female",
         birth_date="2006-03",
         missing_date="2011-07-14",
         location="Maple Harbor - Hillside District",
@@ -44,9 +44,9 @@ PARENT_ENTRIES = [
     ),
     # Pair 1: Marcus
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Marcus Johnson",
-        gender="男",
+        gender="male",
         birth_date="2004-11",
         missing_date="2009-08-22",
         location="Ironwood - South End, near the university",
@@ -56,9 +56,9 @@ PARENT_ENTRIES = [
     ),
     # Pair 2: Sofia
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Sofia Reyes",
-        gender="女",
+        gender="female",
         birth_date="2007-06",
         missing_date="2012-03-10",
         location="Sunfield - near the Galleria district",
@@ -68,9 +68,9 @@ PARENT_ENTRIES = [
     ),
     # Pair 3: Aiden
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Aiden O'Brien",
-        gender="男",
+        gender="male",
         birth_date="2005-01",
         missing_date="2010-06-05",
         location="Harborton - Bayshore neighborhood",
@@ -80,14 +80,14 @@ PARENT_ENTRIES = [
     ),
     # Pair 4: Lily
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Lily Zhang",
-        gender="女",
+        gender="female",
         birth_date="2008-09",
         missing_date="2013-04-18",
         location="Cedarvale - Heritage District",
         physical_features="Strawberry hemangioma on back of neck (raised red spot, about 1cm); webbed toes on left foot (2nd and 3rd toes)",
-        description="Lily disappeared near Dragon Gate Park. She was 4.5 years old. Very energetic, loved to draw and always had crayons with her. Family owned a dim sum restaurant. She could speak Cantonese phrases. Grandmother called her 'Little Fish' (小鱼). House was above the restaurant, she could always smell food cooking. Loved watching the ferries from the waterfront.",
+        description="Lily disappeared near Dragon Gate Park. She was 4.5 years old. Very energetic, loved to draw and always had crayons with her. Family owned a dim sum restaurant. She could speak Cantonese phrases. Grandmother called her 'Little Fish'. House was above the restaurant, she could always smell food cooking. Loved watching the ferries from the waterfront.",
         contact="Wei Zhang 206-***-7890",
     ),
 
@@ -95,9 +95,9 @@ PARENT_ENTRIES = [
 
     # Pair 5: Noah
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Noah Williams",
-        gender="男",
+        gender="male",
         birth_date="2003-08",
         missing_date="2008-12-20",
         location="Pinecrest - Hilltop area",
@@ -107,9 +107,9 @@ PARENT_ENTRIES = [
     ),
     # Pair 6: Zara
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Zara Patel",
-        gender="女",
+        gender="female",
         birth_date="2006-04",
         missing_date="2011-09-08",
         location="Willowbrook - Brookside area",
@@ -119,9 +119,9 @@ PARENT_ENTRIES = [
     ),
     # Pair 7: Tyler
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Tyler Morrison",
-        gender="男",
+        gender="male",
         birth_date="2005-12",
         missing_date="2010-05-30",
         location="Fernridge - near Fernridge Avenue District",
@@ -131,9 +131,9 @@ PARENT_ENTRIES = [
     ),
     # Pair 8: Chloe
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Chloe Kim",
-        gender="女",
+        gender="female",
         birth_date="2007-02",
         missing_date="2011-11-15",
         location="Starlight City - the Korean quarter",
@@ -143,9 +143,9 @@ PARENT_ENTRIES = [
     ),
     # Pair 9: Lucas
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Lucas Rivera",
-        gender="男",
+        gender="male",
         birth_date="2004-07",
         missing_date="2009-10-31",
         location="Redstone - near Red Canyon",
@@ -158,9 +158,9 @@ PARENT_ENTRIES = [
 
     # Pair 10: Maya
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Maya Cooper",
-        gender="女",
+        gender="female",
         birth_date="2005-05",
         missing_date="2009-09-12",
         location="Melodia - East Melodia",
@@ -170,9 +170,9 @@ PARENT_ENTRIES = [
     ),
     # Pair 11: Ethan
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Ethan Park",
-        gender="男",
+        gender="male",
         birth_date="2006-10",
         missing_date="2011-03-22",
         location="Frostlake - Lakeside area",
@@ -182,9 +182,9 @@ PARENT_ENTRIES = [
     ),
     # Pair 12: Isabelle
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Isabelle Dubois",
-        gender="女",
+        gender="female",
         birth_date="2004-03",
         missing_date="2008-08-04",
         location="Crescent Bay - Old Quarter area",
@@ -194,9 +194,9 @@ PARENT_ENTRIES = [
     ),
     # Pair 13: Jayden
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Jayden Brooks",
-        gender="男",
+        gender="male",
         birth_date="2007-11",
         missing_date="2012-07-04",
         location="Steelhaven - Midtown",
@@ -206,9 +206,9 @@ PARENT_ENTRIES = [
     ),
     # Pair 14: Olivia
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Olivia Santos",
-        gender="女",
+        gender="female",
         birth_date="2005-08",
         missing_date="2010-02-14",
         location="Palmetto Shore - Little Havana district",
@@ -220,9 +220,9 @@ PARENT_ENTRIES = [
     # --- DISTRACTOR PARENTS (15-22): no matching child ---
 
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Hannah Lee",
-        gender="女",
+        gender="female",
         birth_date="2006-07",
         missing_date="2011-04-02",
         location="Oceanview - Hilltop",
@@ -231,9 +231,9 @@ PARENT_ENTRIES = [
         contact="Jason Lee 619-***-1234",
     ),
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Ryan Mitchell",
-        gender="男",
+        gender="male",
         birth_date="2003-05",
         missing_date="2008-09-15",
         location="Dockside - Harbor Row",
@@ -242,9 +242,9 @@ PARENT_ENTRIES = [
         contact="Tom Mitchell 215-***-5678",
     ),
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Amara Wilson",
-        gender="女",
+        gender="female",
         birth_date="2008-01",
         missing_date="2012-06-20",
         location="Eastgate - Beacon Hill",
@@ -253,9 +253,9 @@ PARENT_ENTRIES = [
         contact="Denise Wilson 410-***-9012",
     ),
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Kevin Nguyen",
-        gender="男",
+        gender="male",
         birth_date="2005-09",
         missing_date="2010-01-10",
         location="Silicon Hills - near the Asian quarter",
@@ -264,9 +264,9 @@ PARENT_ENTRIES = [
         contact="Thanh Nguyen 408-***-3456",
     ),
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Stella Brown",
-        gender="女",
+        gender="female",
         birth_date="2007-04",
         missing_date="2012-10-31",
         location="Wildflower - South River area",
@@ -275,9 +275,9 @@ PARENT_ENTRIES = [
         contact="Brandon Brown 512-***-7890",
     ),
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Derek Chang",
-        gender="男",
+        gender="male",
         birth_date="2004-02",
         missing_date="2009-05-25",
         location="Golden Meadow - River Park",
@@ -286,9 +286,9 @@ PARENT_ENTRIES = [
         contact="Linda Chang 916-***-0123",
     ),
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Nina Volkov",
-        gender="女",
+        gender="female",
         birth_date="2006-11",
         missing_date="2011-08-08",
         location="Seaside Heights - Seaside Heights",
@@ -297,9 +297,9 @@ PARENT_ENTRIES = [
         contact="Sergei Volkov 718-***-4567",
     ),
     Entry(
-        entry_type="家寻宝贝",
+        entry_type="parent_seeking",
         name="Jerome Washington",
-        gender="男",
+        gender="male",
         birth_date="2005-06",
         missing_date="2010-11-25",
         location="Archway - near the Archway Monument",
@@ -317,9 +317,9 @@ CHILD_ENTRIES = [
 
     # Matches Pair 0 (Emma) - dog color slightly wrong, but features match well
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Amy Liu)",
-        gender="女",
+        gender="female",
         birth_date="2006 (approx)",
         missing_date="Around 2011",
         location="Remember a hilly city with colorful houses and fog. Near a park with palm trees.",
@@ -329,9 +329,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 1 (Marcus) - remembers grandma, stuttering, train love
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Michael Brown)",
-        gender="男",
+        gender="male",
         birth_date="2004-2005 (approx)",
         missing_date="Around 2009",
         location="Big city, very cold winters. Remember elevated trains and tall buildings.",
@@ -341,9 +341,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 2 (Sofia) - remembers brother, fear of dogs, blanket
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Sophie Adams)",
-        gender="女",
+        gender="female",
         birth_date="2007 (approx)",
         missing_date="Around 2012",
         location="Somewhere hot, a big city in the south. Remember a very large mall.",
@@ -353,9 +353,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 3 (Aiden) - remembers firefighters, red hair, gap teeth
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Andrew Foster)",
-        gender="男",
+        gender="male",
         birth_date="2005 (approx)",
         missing_date="Around 2010",
         location="A city on the east coast, old buildings, near the ocean I think.",
@@ -365,9 +365,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 4 (Lily) - remembers restaurant smells, drawing, grandma nickname
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Grace Wang)",
-        gender="女",
+        gender="female",
         birth_date="2008-2009 (approx)",
         missing_date="Around 2013",
         location="Rainy city with water everywhere - boats, maybe ferries. Near a Chinatown area.",
@@ -380,9 +380,9 @@ CHILD_ENTRIES = [
 
     # Matches Pair 5 (Noah) - remembers dad building things but says "metal" instead of wood, piano correct
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Nathan Scott)",
-        gender="男",
+        gender="male",
         birth_date="2003-2004 (approx)",
         missing_date="Around 2008-2009",
         location="Somewhere with mountains, cold, lots of snow in winter.",
@@ -392,9 +392,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 6 (Zara) - remembers dancing, restaurant, but says "Thai" instead of Indian
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Zoe Henderson)",
-        gender="女",
+        gender="female",
         birth_date="2006 (approx)",
         missing_date="Around 2011",
         location="Warm city in the south, lots of trees. Remember a big parking lot.",
@@ -404,9 +404,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 7 (Tyler) - remembers bookstore, climbing, dinosaurs, but says mom ran the store
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Travis King)",
-        gender="男",
+        gender="male",
         birth_date="2005-2006 (approx)",
         missing_date="Around 2010",
         location="Rainy city, lots of bridges. Remember a street with interesting shops.",
@@ -416,9 +416,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 8 (Chloe) - remembers grandma, Korean food, but says 5th floor instead of 3rd
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Claire Yang)",
-        gender="女",
+        gender="female",
         birth_date="2007 (approx)",
         missing_date="Around 2011-2012",
         location="Big city, lots of Korean signs and shops. Very busy streets.",
@@ -428,9 +428,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 9 (Lucas) - remembers dad smelling like something, rock collecting, but Halloween details wrong
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Leo Martinez)",
-        gender="男",
+        gender="male",
         birth_date="2004-2005 (approx)",
         missing_date="Around 2009",
         location="Very hot place, dry, like a desert. Mountains in the distance.",
@@ -443,9 +443,9 @@ CHILD_ENTRIES = [
 
     # Matches Pair 10 (Maya) - eyes are correct, but many false memories mixed in
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Mia Thompson)",
-        gender="女",
+        gender="female",
         birth_date="2005-2006 (approx)",
         missing_date="Around 2009-2010",
         location="Somewhere with a lot of music? Maybe the south? I'm really not sure.",
@@ -455,9 +455,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 11 (Ethan) - remembers LEGO, snow, dog, but mixed with fabricated memories
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Eric Johnson)",
-        gender="男",
+        gender="male",
         birth_date="2006-2007 (approx)",
         missing_date="Around 2011",
         location="Very cold place, lots of snow. Near some water, a lake maybe.",
@@ -467,9 +467,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 12 (Isabelle) - remembers water, music, food smells, but massive location confusion
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Bella Richards)",
-        gender="女",
+        gender="female",
         birth_date="2004-2005 (approx)",
         missing_date="Around 2008-2009",
         location="I think it was a coastal city? There was a lot of water. Very hot and humid. Maybe somewhere tropical? (Note: actually Crescent Bay)",
@@ -479,9 +479,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 13 (Jayden) - remembers cars, grandpa, mom cutting hair, but thinks he was 3 not 4.5
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: James Cooper)",
-        gender="男",
+        gender="male",
         birth_date="2008 (approx, thinks younger than actual)",
         missing_date="Around 2011-2012, maybe summer",
         location="A big city, industrial feeling. Lots of empty buildings and parking lots.",
@@ -491,9 +491,9 @@ CHILD_ENTRIES = [
     ),
     # Matches Pair 14 (Olivia) - remembers lizards, parrot, coffee smell, but many details jumbled
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Lily Morgan)",
-        gender="女",
+        gender="female",
         birth_date="2005-2006 (approx)",
         missing_date="Around 2010",
         location="Hot, tropical feeling. Palm trees. Bright colors everywhere. Latin music.",
@@ -505,9 +505,9 @@ CHILD_ENTRIES = [
     # --- DISTRACTOR CHILDREN (15-22): no matching parent ---
 
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Daniel Park)",
-        gender="男",
+        gender="male",
         birth_date="2003-2005 (uncertain)",
         missing_date="Uncertain, maybe age 4-6",
         location="No clear memory, might have been a city",
@@ -516,9 +516,9 @@ CHILD_ENTRIES = [
         contact="Daniel Park 347-***-1717",
     ),
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Sarah Chen)",
-        gender="女",
+        gender="female",
         birth_date="2006 (approx)",
         missing_date="Around 2010",
         location="Somewhere sunny and dry, maybe in the southwest",
@@ -527,9 +527,9 @@ CHILD_ENTRIES = [
         contact="Sarah Chen 818-***-1818",
     ),
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Marcus Wright)",
-        gender="男",
+        gender="male",
         birth_date="2005 (approx)",
         missing_date="Around 2009",
         location="Remember a castle-like building nearby, maybe a theme park?",
@@ -538,9 +538,9 @@ CHILD_ENTRIES = [
         contact="Marcus Wright 407-***-1919",
     ),
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Jessica Kim)",
-        gender="女",
+        gender="female",
         birth_date="2004-2006 (very uncertain)",
         missing_date="Uncertain",
         location="Remember the ocean and very high mountains - not sure if same place",
@@ -549,9 +549,9 @@ CHILD_ENTRIES = [
         contact="Jessica Kim 808-***-2020",
     ),
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Tommy Lee)",
-        gender="男",
+        gender="male",
         birth_date="2007 (approx)",
         missing_date="Around 2011",
         location="Don't remember the location at all",
@@ -560,9 +560,9 @@ CHILD_ENTRIES = [
         contact="Tommy Lee 469-***-2121",
     ),
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Anna Petrova)",
-        gender="女",
+        gender="female",
         birth_date="2008-2009 (approx)",
         missing_date="Around 2010-2011",
         location="No memory at all",
@@ -571,9 +571,9 @@ CHILD_ENTRIES = [
         contact="Anna Petrova 503-***-2222",
     ),
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Chris Williams)",
-        gender="男",
+        gender="male",
         birth_date="2002-2003 (approx)",
         missing_date="Around 2006-2007",
         location="Remember living in at least three different places before my adoptive family",
@@ -582,9 +582,9 @@ CHILD_ENTRIES = [
         contact="Chris Williams 614-***-2323",
     ),
     Entry(
-        entry_type="宝贝寻家",
+        entry_type="child_seeking",
         name="(Current name: Maya Robinson)",
-        gender="女",
+        gender="female",
         birth_date="2006 (approx)",
         missing_date="Around 2010",
         location="Somewhere with lots of rain and green trees",

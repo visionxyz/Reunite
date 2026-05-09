@@ -6,7 +6,7 @@ import time
 import uuid
 from datetime import datetime
 from everos import EverOS
-from app.models import Entry, MatchResult
+from app.models import Entry, MatchResult, PARENT_SEEKING, CHILD_SEEKING
 from app import database as db
 
 _client: EverOS | None = None
@@ -31,7 +31,7 @@ CHILD_GROUP = "reunite_children_v2"
 
 
 def _entry_group_id(entry: Entry) -> str:
-    return PARENT_GROUP if entry.entry_type == "家寻宝贝" else CHILD_GROUP
+    return PARENT_GROUP if entry.entry_type == PARENT_SEEKING else CHILD_GROUP
 
 
 def _ts_ms(entry: Entry | None = None) -> int:
@@ -43,7 +43,7 @@ def _ts_ms(entry: Entry | None = None) -> int:
     return int(time.time() * 1000)
 
 
-_GENDER_EN = {"男": "male", "女": "female", "未知": "unknown"}
+# Gender values are now stored canonically in English; no translation needed.
 
 
 def _strip_around(s: str) -> str:
@@ -63,10 +63,9 @@ def _clean(s: str) -> str:
 
 
 def _entry_to_english(entry: Entry) -> str:
-    """Render an Entry as a single English paragraph for EverOS extraction.
-    No Chinese field labels, no mixed-language noise — natural sentences only."""
+    """Render an Entry as a single English paragraph for EverOS extraction."""
     lines: list[str] = []
-    is_parent = entry.entry_type == "家寻宝贝"
+    is_parent = entry.entry_type == PARENT_SEEKING
 
     name = _strip_current_name_wrap(entry.name) if entry.name else ""
     is_adoptive_name = bool(entry.name) and entry.name != name
@@ -76,10 +75,10 @@ def _entry_to_english(entry: Entry) -> str:
     features = _clean(entry.physical_features)
     description = _clean(entry.description)
 
-    gender_en = _GENDER_EN.get(entry.gender, entry.gender) if entry.gender else None
+    gender = entry.gender if entry.gender and entry.gender != "unknown" else None
     age_bits = []
-    if gender_en and gender_en != "unknown":
-        age_bits.append(gender_en)
+    if gender:
+        age_bits.append(gender)
     if birth:
         age_bits.append(f"born around {birth}")
 
@@ -280,7 +279,7 @@ def find_matches(
     EverOS hybrid (or keyword fallback) → score threshold.
     Empty list = "no meaningful match" (search miss).
     """
-    search_type = "宝贝寻家" if entry.entry_type == "家寻宝贝" else "家寻宝贝"
+    search_type = CHILD_SEEKING if entry.entry_type == PARENT_SEEKING else PARENT_SEEKING
     candidates = db.get_all_entries(entry_type=search_type)
     candidates = [c for c in candidates if _passes_hard_filter(entry, c)]
     if not candidates:
