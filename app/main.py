@@ -117,17 +117,29 @@ async def list_entries(
     }
 
 
-def _background_match(public_id: str) -> None:
-    """Compute matches for an entry and stash them as suggestions."""
+def _background_match(public_id: str, delay_seconds: float = 0.0) -> None:
+    """Compute matches for an entry and stash them as suggestions.
+
+    The optional `delay_seconds` lets callers stagger the search after a
+    fresh add+flush. EverOS returns "extracted" from flush() the moment
+    a boundary is detected, but the search index takes a few more
+    seconds to fully reflect the new MemCell — running find_matches
+    immediately can produce sparse, transient results."""
+    if delay_seconds > 0:
+        import time as _time
+        _time.sleep(delay_seconds)
     entry = db.get_entry_by_public_id(public_id)
     if not entry:
+        print(f"[background_match] {public_id}: entry not found")
         return
     try:
         results = matching.find_matches(entry, top_k=10)
     except Exception as e:
         print(f"[background_match] error for {public_id}: {e}")
+        traceback.print_exc()
         return
     pairs = [(r.entry.public_id, round(r.score, 4)) for r in results if r.entry.public_id]
+    print(f"[background_match] {public_id} ({entry.name}): {len(pairs)} matches stored")
     db.replace_suggestions(public_id, pairs)
 
 
@@ -166,7 +178,10 @@ async def create_entry(
     db.insert_entry(entry)  # populates entry.id and entry.public_id
     matching.store_memory(entry)
     # Fire-and-forget: compute potential matches and stash as suggestions.
-    background_tasks.add_task(_background_match, entry.public_id)
+    # Wait ~5s before computing matches so EverOS's index has time to
+    # reflect the message we just flushed; otherwise the search returns
+    # sparse, transient results.
+    background_tasks.add_task(_background_match, entry.public_id, 15.0)
     return {"public_id": entry.public_id, "message": "Registered successfully"}
 
 
@@ -185,7 +200,8 @@ async def update_entry(public_id: str, background_tasks: BackgroundTasks, payloa
     matching.store_memory(updated)
 
     # Recompute suggestions so the owner sees fresh matches next time.
-    background_tasks.add_task(_background_match, public_id)
+    # Same staggered delay as register — EverOS index needs a few seconds.
+    background_tasks.add_task(_background_match, public_id, 15.0)
 
     return updated.to_dict()
 

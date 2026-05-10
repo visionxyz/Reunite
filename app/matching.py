@@ -129,16 +129,20 @@ def _entry_to_message(entry: Entry) -> dict:
 
 
 def store_memory(entry: Entry) -> bool:
-    """Store a single entry synchronously. Use store_memories_batch() for
-    bulk loads — async_mode=True queues drop messages under load."""
+    """Store a single entry and force boundary detection.
+
+    EverOS's semantic boundary detector waits for a sliding-window topic
+    shift before producing a MemCell. Since each entry is a single
+    message, that shift never arrives on its own — so we explicitly
+    flush() to make the extraction happen now.
+    Use store_memories_batch() for bulk loads to avoid N flushes."""
     client = _get_client()
     if not client or not entry.id:
         return False
+    gid = _entry_group_id(entry)
     try:
-        client.v1.memories.group.add(
-            group_id=_entry_group_id(entry),
-            messages=[_entry_to_message(entry)],
-        )
+        client.v1.memories.group.add(group_id=gid, messages=[_entry_to_message(entry)])
+        client.v1.memories.group.flush(group_id=gid)
         return True
     except Exception as e:
         print(f"[EverOS] store error: {e}")

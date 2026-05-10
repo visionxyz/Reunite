@@ -467,12 +467,14 @@
                 }
                 const sugs = await res.json();
                 if (sugs.length === 0) {
-                    // Background matching can take ~5-10s after registration.
-                    // Retry up to 3 times before giving up so freshly registered
-                    // entries don't see a stale "no matches" message.
-                    if (attempt < 3) {
+                    // Background matching kicks off ~15s after register
+                    // (EverOS index needs time to stabilize) and the search
+                    // itself takes a couple seconds. Retry up to 6 × 5s = 30s
+                    // so freshly-registered entries don't see a stale
+                    // "no matches" message.
+                    if (attempt < 6) {
                         slot.innerHTML = '<div class="suggestions-empty">Searching for matches…</div>';
-                        setTimeout(() => loadSuggestionsFor(entry, attempt + 1), 4000);
+                        setTimeout(() => loadSuggestionsFor(entry, attempt + 1), 5000);
                         return;
                     }
                     slot.innerHTML = '<div class="suggestions-empty">No matches above the confidence threshold yet. New entries are added regularly — try adding more details to widen the search.</div>';
