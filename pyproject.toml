@@ -3,6 +3,8 @@ name = "reunite-app"
 version = "0.1.0"
 description = "AI-powered missing children matching platform using EverOS semantic memory"
 readme = "README.md"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
     "aiofiles>=25.1.0",

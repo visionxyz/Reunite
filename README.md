@@ -157,5 +157,14 @@ reunite-app/
 │   │   └── index.html   # Single-page frontend
 │   └── static/
 │       └── style.css    # Styles
+├── LICENSE              # GNU AGPL 3.0
 └── .env.example         # API key template
 ```
+
+## License
+
+Reunite is licensed under the **GNU Affero General Public License v3.0 or later** (AGPL-3.0-or-later). See the [LICENSE](LICENSE) file for the full text.
+
+The AGPL is a strong copyleft license: anyone modifying this code — *including running it as a hosted service over a network* — must release their modified source under the same terms. The choice is deliberate: this is humanitarian infrastructure for reuniting families, and improvements should remain available to anyone trying to do the same work.
+
+Copyright (C) 2026 Reunite contributors.
