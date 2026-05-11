@@ -154,8 +154,51 @@ h4 { font-size: 1rem; }
 .hero {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 3.5rem 2rem 2.5rem;
+    padding: 2.5rem 2rem 2rem;
 }
+.hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.75rem 0.35rem 0.7rem;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 999px;
+    margin-bottom: 1.25rem;
+}
+.eyebrow-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #DC2626;
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5);
+    animation: pulse-dot 2s ease-out infinite;
+}
+@keyframes pulse-dot {
+    0%   { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+    70%  { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+.eyebrow-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #991B1B;
+}
+.hero-notice {
+    margin-top: 1.25rem;
+    padding: 0.875rem 1rem;
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-left: 3px solid #DC2626;
+    border-radius: var(--r-sm);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: #7F1D1D;
+    max-width: 64ch;
+}
+.hero-notice strong { color: #991B1B; font-weight: 700; }
 .hero h1 {
     font-size: 2.5rem;
     font-weight: 600;
